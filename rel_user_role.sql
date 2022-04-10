@@ -1,0 +1,9 @@
+INSERT INTO `rel_user_role`(`id`, `roleid`, `userid`) VALUES (1, 1, 1);
+INSERT INTO `rel_user_role`(`id`, `roleid`, `userid`) VALUES (2, 1, 2);
+INSERT INTO `rel_user_role`(`id`, `roleid`, `userid`) VALUES (3, 2, 3);
+INSERT INTO `rel_user_role`(`id`, `roleid`, `userid`) VALUES (4, 2, 4);
+INSERT INTO `rel_user_role`(`id`, `roleid`, `userid`) VALUES (5, 2, 5);
+INSERT INTO `rel_user_role`(`id`, `roleid`, `userid`) VALUES (6, 2, 6);
+INSERT INTO `rel_user_role`(`id`, `roleid`, `userid`) VALUES (7, 2, 7);
+INSERT INTO `rel_user_role`(`id`, `roleid`, `userid`) VALUES (8, 2, 2);
+INSERT INTO `rel_user_role`(`id`, `roleid`, `userid`) VALUES (9, 2, 1);

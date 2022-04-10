@@ -1,0 +1,19 @@
+server:
+  port: 8080
+student:
+  name: daizixie
+  age: 22
+  content: "name:${name},age:${age}"
+spring:
+  mvc:
+    view:
+      prefix: /WEB-INF/views/
+      suffix: .jsp
+  datasource:
+    url: jdbc:mysql://localhost:3306/CHATSERVER?characterEncoding=UTF-8&useSSL=false&serverTimezone=UTC
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+#mybatis:
+#  mapper-locations: classpath:mapping
