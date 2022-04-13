@@ -39,9 +39,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
         return bean;
     }
 
-    @Resource
-    private TokenInterceptor tokenInterceptor ;
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(tokenInterceptor).addPathPatterns("/**");
-    }
+//    @Resource
+//    private TokenInterceptor tokenInterceptor ;
+//    public void addInterceptors(InterceptorRegistry registry) {
+//        registry.addInterceptor(tokenInterceptor).addPathPatterns("/**");
+//    }
 }
