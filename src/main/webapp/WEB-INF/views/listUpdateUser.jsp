@@ -11,6 +11,7 @@
         <td>isSystem</td>
         <td>Icon</td>
         <td>updateIcon</td>
+        <td>deleteUser</td>
     </tr>
     <c:forEach items="${users}" var="usr" varStatus="st">
         <tr>
@@ -27,6 +28,12 @@
                     <input  id="file_${usr.id}" name="file" type="file" style="float: left;display:none"/>
                     <input name="id" type="text" value="${usr.id}" style="visibility: hidden;width: 0px">
                     <input  class="btn btn-primary" type="submit" value="提交" style="float: left">
+                </form>
+            </td>
+            <td>
+                <form action="/user/doDeleteUser" method="post" enctype ="multipart/form-data">
+                    <input name="id" type="text" value="${usr.id}" style="visibility: hidden;width: 0px">
+                    <input  class="btn btn-primary" type="submit" value="删除" style="float: left">
                 </form>
             </td>
         </tr>

@@ -102,6 +102,7 @@ public class UserController {
         return "listUpdateUser";
     }
 
+    @PreAuthorize("hasAuthority('admin')")
     @PostMapping (path = "/doInsertIcon")
     public String insertIcon(@RequestParam("file")MultipartFile file,@RequestParam("id")String id) {
         try {
@@ -117,6 +118,20 @@ public class UserController {
         }
         return "redirect:/user/listUpdate";
 
+    }
+
+    @PreAuthorize("hasAuthority('admin')")
+    @PostMapping (path = "/doDeleteUser")
+    public String deleteUser(@RequestParam("id")String id,Model model) {
+        int intId = Integer.parseInt(id);
+        String warningMsg = null;
+        if(userService.deleteUser(intId)==1) {
+            return "redirect:/user/listUpdate";
+        }else {
+            warningMsg = "删除失败";
+            model.addAttribute("warningMsg", warningMsg);
+            return "warningPage";
+        }
     }
 
     private byte[] readIconFile(MultipartFile file) throws IOException {

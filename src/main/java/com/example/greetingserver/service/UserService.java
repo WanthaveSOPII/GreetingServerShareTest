@@ -47,6 +47,32 @@ public class UserService {
         return -1;
     }
 
+    /**
+     *
+     * @param id 用户对象的id
+     * @return int
+     * 1:删除成功
+     * 0:删除失败
+     * -1:删除出错
+     */
+    public int deleteUser(int id){
+        List<Integer> res = null;
+
+        if(id<=0) {
+            return -1;
+        }
+
+        res = userMapper.deleteUser(id);
+        if((res!=null)&&(res.size()==1)){
+            if(res.get(0)==0){
+                return 1;
+            }else if(res.get(0)>0) {
+                return 0;
+            }
+        }
+        return -1;
+    }
+
     public int insertIcon(User user){
         userMapper.insertIcon(user);
         return 0;

@@ -22,7 +22,7 @@ public interface UserMapper {
     @Select("CALL insertUser(#{username},#{nickname},#{password})")
     List<Integer> addUser(User user);
 
-    @Select("SELECT Id, UserName, Nickname, Active ,IsSystem,Icon FROM user")
+    @Select("SELECT Id, UserName, Nickname, Active ,IsSystem,Icon FROM user WHERE active=1")
     List<User> findAll();
 
     @Select("SELECT Count(*) FROM user where UserName = #{username}")
@@ -40,5 +40,8 @@ public interface UserMapper {
 
     @Select("CALL getUserRoles(#{username})")
     List<UserRoles> getUserRoles(String username);
+
+    @Select("CALL deleteUser(#{id})")
+    List<Integer> deleteUser(int id);
 
 }
