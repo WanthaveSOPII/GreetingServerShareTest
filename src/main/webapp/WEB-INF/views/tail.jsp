@@ -2,10 +2,6 @@
          pageEncoding="UTF-8"%>
 
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-<head>
-    <title>403</title>
-</head>
-<body>
-你没有资格啊，没有资格
-</body>
-<jsp:include page="tail.jsp"/>
+<form name="form" method="post" action="/hello">
+    <input type="submit" value="返回主菜单">
+</form>

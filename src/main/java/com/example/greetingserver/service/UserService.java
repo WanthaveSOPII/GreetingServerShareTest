@@ -49,24 +49,20 @@ public class UserService {
 
     /**
      *
-     * @param id 用户对象的id
+     * @param username 用户名
      * @return int
      * 1:删除成功
-     * 0:删除失败
+     * 0:用户不存在
      * -1:删除出错
      */
-    public int deleteUser(int id){
+    public int deleteUser(String username){
         List<Integer> res = null;
 
-        if(id<=0) {
-            return -1;
-        }
-
-        res = userMapper.deleteUser(id);
+        res = userMapper.deleteUser(username);
         if((res!=null)&&(res.size()==1)){
-            if(res.get(0)==0){
+            if(res.get(0)==1){
                 return 1;
-            }else if(res.get(0)>0) {
+            }else if(res.get(0)==0) {
                 return 0;
             }
         }
@@ -79,7 +75,7 @@ public class UserService {
     }
 
     //hasAuthority不需要前缀，hasROLE需要ROLE_前缀
-    @PreAuthorize("hasAuthority('stranger') or hasAuthority('admin')")
+//    @PreAuthorize("hasAuthority('stranger') or hasAuthority('admin')")
     public List<User> findAll(){
         List<User> users = userMapper.findAll();
 
@@ -143,9 +139,24 @@ public class UserService {
         return user;
     }
 
+    public User getUserInfoByName(String username){
+
+        List<User> userInfo = userMapper.getUserInfoByName(username);
+        if((userInfo==null)||(userInfo.size()==0)){
+            return null;
+        }
+        User user = userInfo.get(0);
+        if(user == null){
+            return null;
+        }
+        user.processIcon();
+        return user;
+    }
+
     public List<UserRoles> getUserRoles(String username){
         List<UserRoles> userRoles = userMapper.getUserRoles(username);
         return userRoles;
     }
+
 
 }

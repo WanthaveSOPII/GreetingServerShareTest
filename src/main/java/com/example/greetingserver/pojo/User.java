@@ -5,10 +5,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import javax.persistence.CascadeType;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToMany;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -23,7 +19,6 @@ public class User implements UserDetails {
     String base64Icon;
     String password;
 
-    @ManyToMany(cascade = {CascadeType.REFRESH},fetch = FetchType.EAGER)
     private List<UserRoles> roles;
 
     public void setPassword(String password) {

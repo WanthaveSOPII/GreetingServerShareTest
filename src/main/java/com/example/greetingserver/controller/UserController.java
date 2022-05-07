@@ -120,12 +120,25 @@ public class UserController {
 
     }
 
+    @PostMapping (path = "/doShowOneUserInfo")
+    public String showOneUserInfo(@RequestParam("username")String username,Model model) {
+        String warningMsg = null;
+        User user =userService.getUserInfoByName(username);
+        if(user!=null) {
+            model.addAttribute("userInfo",user);
+            return "oneUserInfo";
+        }else {
+            warningMsg = "打开详情页面失败";
+            model.addAttribute("warningMsg", warningMsg);
+            return "warningPage";
+        }
+    }
+
     @PreAuthorize("hasAuthority('admin')")
     @PostMapping (path = "/doDeleteUser")
-    public String deleteUser(@RequestParam("id")String id,Model model) {
-        int intId = Integer.parseInt(id);
+    public String deleteUser(@RequestParam("username")String username,Model model) {
         String warningMsg = null;
-        if(userService.deleteUser(intId)==1) {
+        if(userService.deleteUser(username)==1) {
             return "redirect:/user/listUpdate";
         }else {
             warningMsg = "删除失败";

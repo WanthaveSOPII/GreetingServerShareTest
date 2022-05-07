@@ -23,3 +23,4 @@
         </tr>
     </c:forEach>
 </table>
+<jsp:include page="tail.jsp"/>

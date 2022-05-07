@@ -38,10 +38,16 @@ public interface UserMapper {
     @Select("SELECT * FROM user where UserName = #{username}")
     List<User> getUserByName(String username);
 
+    @Select("SELECT Id, UserName, Nickname, Active ,IsSystem,Icon FROM user where UserName = #{username}")
+    List<User> getUserInfoByName(String username);
+
     @Select("CALL getUserRoles(#{username})")
     List<UserRoles> getUserRoles(String username);
 
-    @Select("CALL deleteUser(#{id})")
-    List<Integer> deleteUser(int id);
+//    @Select("CALL deleteUser(#{id})")
+//    List<Integer> deleteUser(int id);
+
+    @Select("SELECT deleteOneUser(#{username})")
+    List<Integer> deleteUser(String username);
 
 }

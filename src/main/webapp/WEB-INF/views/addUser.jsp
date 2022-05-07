@@ -50,3 +50,4 @@
         </section>
     </section>
 </div>
+<jsp:include page="tail.jsp"/>

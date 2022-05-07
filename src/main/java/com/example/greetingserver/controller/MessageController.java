@@ -12,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @EnableAutoConfiguration
@@ -25,9 +26,10 @@ public class MessageController {
     UserService userService;
 
     @RequestMapping("/listMessage")
-    public String listMessage(Model model) {
+    public String listMessage(Model model, HttpServletRequest request) {
         List<Message> messages = messageService.findAll();
         model.addAttribute("messages", messages);
+        model.addAttribute("NickName",request.getUserPrincipal().getName());
         return "showMessages";
     }
 }

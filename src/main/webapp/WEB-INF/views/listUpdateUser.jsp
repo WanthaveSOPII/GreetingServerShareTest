@@ -32,7 +32,7 @@
             </td>
             <td>
                 <form action="/user/doDeleteUser" method="post" enctype ="multipart/form-data">
-                    <input name="id" type="text" value="${usr.id}" style="visibility: hidden;width: 0px">
+                    <input name="username" type="text" value="${usr.username}" style="visibility: hidden;width: 0px">
                     <input  class="btn btn-primary" type="submit" value="删除" style="float: left">
                 </form>
             </td>

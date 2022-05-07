@@ -79,19 +79,18 @@
 
                     ws.onmessage = function(event) {
                         // var log = document.getElementById("log");
-                        console.log("收到 "+event.data);
+                        console.log(event.data);
                         // var message = JSON.parse(event.data);
                         // log.innerHTML += message.from + " : " + message.content + "\n";
                     };
                 }
 
                 function send() {
-
                     var content = document.getElementById("msg").value;
                     var json = JSON.stringify({
-                        "info":content
+                        "content":content
                     });
-                    console.log("发送信息 "+ content);
+
                     ws.send(json);
                 }
             </script>
