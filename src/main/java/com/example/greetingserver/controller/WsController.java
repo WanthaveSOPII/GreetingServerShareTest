@@ -27,6 +27,9 @@ import java.util.concurrent.CopyOnWriteArraySet;
 public class WsController {
 
 //    @Autowired
+    /**
+     SeverEndPoint与Autowired冲突导致，只能用方法的Autowired
+     */
     private static MessageService messageService;
     @Autowired
     public void setMessageService(MessageService messageService){WsController.messageService=messageService;}
