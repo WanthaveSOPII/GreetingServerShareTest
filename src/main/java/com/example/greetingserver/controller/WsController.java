@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
@@ -25,8 +26,10 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @ServerEndpoint(value = "/wsPage/{username}", decoders = MessageDecoder.class, encoders = MessageEncoder.class)
 public class WsController {
 
+//    @Autowired
+    private static MessageService messageService;
     @Autowired
-    MessageService messageService;
+    public void setMessageService(MessageService messageService){WsController.messageService=messageService;}
 
     @Autowired
     UserService userService;
@@ -45,6 +48,7 @@ public class WsController {
     @OnMessage
     public void onMessage(Session session, Message message) throws IOException, EncodeException {
         message.setSender(users.get(session.getId()));
+        messageService.insertMessage(message);
         broadcast(message);
     }
 

@@ -40,7 +40,7 @@ public class ChatController {
 
         List<User> users = userService.findAll();
         model.addAttribute("users", users);
-        List<Message> messages = messageService.findAll();
+        List<Message> messages = messageService.findTopTen();
         model.addAttribute("messages", messages);
         model.addAttribute("me", me);
         return "chatPage";

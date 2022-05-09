@@ -23,4 +23,18 @@ public class MessageService {
         }
         return messageList;
     };
+
+    public List<Message> findTopTen(){
+        List<Message> messageList;
+        messageList = messageMapper.findTopTen();
+        for (Message msg:messageList) {
+            String msgHead = "Receiver:";
+            msg.setRecver(msgHead+msg.getRecver());
+        }
+        return messageList;
+    };
+
+    public void insertMessage(Message msg){
+        messageMapper.insertMessage(msg);
+    }
 }

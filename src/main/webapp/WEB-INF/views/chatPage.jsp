@@ -28,7 +28,7 @@
             </ul>
         </div>
         <div class="right">
-            <div class="chat" >
+            <div class="chat" id="chat">
                 <div class="conversation-start">
                     <span>Today, 5:38 PM</span>
                 </div>
@@ -43,6 +43,7 @@
                         </div>
                     </div>
                 </c:forEach>
+<%--                <div id="newdiv"></div>--%>
             </div>
             <script type="text/javascript">
                 var objs = document.getElementsByName("${me}");
@@ -60,8 +61,8 @@
             <div class="write">
                 <a href="javascript:;" class="write-link attach"></a>
                 <input type="text" id="msg"/>
-                <button onclick="connect()" class="write-link smiley"></button>
-                <button onclick="send()" class="write-link send"></button>
+                <button onclick="send()" style="height: 41px" class="write-link send"></button>
+<%--                <button onclick="send()" class="write-link send"></button>--%>
             </div>
 
             <script type="text/javascript">
@@ -71,16 +72,43 @@
                     var username = "${me}";
 
                     var host = document.location.host;
-                    var pathname = document.location.pathname;
+                    // var pathname = document.location.pathname;
 
-
-                    // ws = new WebSocket("ws://" +host  + pathname + "/" + username);
                     ws = new WebSocket("ws://" +host  + "/wsPage/" + username);
 
                     ws.onmessage = function(event) {
-                        // var log = document.getElementById("log");
                         console.log("收到 "+event.data);
-                        // var message = JSON.parse(event.data);
+                        var chatdiv = document.getElementById("chat");
+                        var message = JSON.parse(event.data);
+                        var newMessage = document.createElement('div');
+                        newMessage.setAttribute("id", "newMessage");
+                        newMessage.setAttribute("style", "height: 70px;");
+                        chatdiv.append(newMessage);
+                        var chaticon = document.createElement('div');
+                        var img = document.createElement('img');
+                        img.src="img/dog.png";
+                        img.setAttribute("class", "chaticon");
+                        chaticon.setAttribute("name", message.sender);
+                        if(message.sender == username){
+                            chaticon.setAttribute("class", "chaticon me");
+                        }else {
+                            chaticon.setAttribute("class", "chaticon you");
+                        }
+                        chaticon.append(img);
+                        newMessage.append(chaticon);
+                        var messageInfo = document.createElement('div');
+                        messageInfo.setAttribute("name", message.sender);
+                        if(message.sender == username) {
+                            messageInfo.setAttribute("class", "bubble me");
+                        }else {
+                            messageInfo.setAttribute("class", "bubble you");
+                        }
+                        messageInfo.innerHTML = message.info;
+                        newMessage.append(messageInfo);
+                        var scroll = document.getElementById('chat');
+                        scroll.scrollTop = scroll.scrollHeight;
+
+
                         // log.innerHTML += message.from + " : " + message.content + "\n";
                     };
                 }
@@ -89,11 +117,14 @@
 
                     var content = document.getElementById("msg").value;
                     var json = JSON.stringify({
-                        "info":content
+                        "info":content,
+                        "recver":"ALLUSER"
                     });
                     console.log("发送信息 "+ content);
                     ws.send(json);
+                    document.getElementById('msg').value=''
                 }
+                window.onload = connect;
             </script>
 
 
