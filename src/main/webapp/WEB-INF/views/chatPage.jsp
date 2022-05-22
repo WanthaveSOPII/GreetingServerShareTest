@@ -122,15 +122,18 @@
                             newMessage.append(messageInfo);
 
                         }else if(message.type == "hello"){
-                             if(hasUserInList(username))
+                             if(hasUserInList(message.sender)==true) {
                                  return;
+                             }
                             addUserToList(message.sender);
-                            var newSysInfo = document.createElement('div');
-                            newSysInfo.setAttribute("class","conversation-start");
-                            var newPeopleInfo = document.createElement('span');
-                            newPeopleInfo.innerHTML = message.sender+"进入了聊天室";
-                            newSysInfo.append(newPeopleInfo);
-                            chatdiv.append(newSysInfo);
+
+                            systemNotification(message.sender+"进入了聊天室")
+                            // var newSysInfo = document.createElement('div');
+                            // newSysInfo.setAttribute("class","conversation-start");
+                            // var newPeopleInfo = document.createElement('span');
+                            // newPeopleInfo.innerHTML = message.sender+"进入了聊天室";
+                            // newSysInfo.append(newPeopleInfo);
+                            // chatdiv.append(newSysInfo);
 
                         }else if(message.type == "listUser"){
                              var userList = message.info.split("/");
@@ -145,6 +148,7 @@
                          }else if(message.type == "bye"){
                              var who = message.info;
                              removeUserFromList(who);
+                             systemNotification(message.info+"离开了聊天室")
                          }
 
                         var scroll = document.getElementById('chat');
@@ -155,7 +159,7 @@
                 }
 
                 function addUserToList(username){
-                    if(hasUserInList(username))
+                    if(hasUserInList(username)==true)
                         return;
                     var newPeople = document.createElement('li');
                     newPeople.setAttribute("class", "person");
@@ -180,6 +184,15 @@
                         return true;
                     }
                     return false;
+                }
+                function systemNotification(info){
+                    var chatdiv = document.getElementById("chat");
+                    var newSysInfo = document.createElement('div');
+                    newSysInfo.setAttribute("class","conversation-start");
+                    var newPeopleInfo = document.createElement('span');
+                    newPeopleInfo.innerHTML = info;
+                    newSysInfo.append(newPeopleInfo);
+                    chatdiv.append(newSysInfo);
                 }
                 function nowTime(){
                     var date = new Date(new Date().getTime() + new Date().getTimezoneOffset()*60*1000);
