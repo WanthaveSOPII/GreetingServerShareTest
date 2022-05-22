@@ -17,9 +17,10 @@ import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 @Component
@@ -46,23 +47,70 @@ public class WsController {
         this.session = session;
         chatEndpoints.add(this);
         users.put(session.getId(), username);
+        this.sendUserList(username);
+
     }
 
+    public void sendUserList(String username) throws IOException, EncodeException{
+        Message message = new Message();
+        message.setType(Message.MSGTYPE_LISTUSER);
+        message.setSender("SYSTEM");
+        message.setRecver(username);
+        message.setInfo(allUsersList());
+        this.unicast(message);
+    }
+
+    public static void broadcastBye(String username) throws IOException, EncodeException{
+        Message message = new Message();
+        message.setType(Message.MSGTYPE_BYE);
+        message.setSender("SYSTEM");
+        message.setRecver("ALLUSER");
+        message.setInfo(username);
+        broadcast(message);
+    }
+
+    private String allUsersList(){
+        String res ="";
+        Iterator<Map.Entry<String, String>> iterator = this.users.entrySet().iterator();
+        while (iterator.hasNext()){
+            Map.Entry<String, String> next = iterator.next();
+            res+=next.getValue()+"/";
+        }
+
+        return res;
+    }
     @OnMessage
     public void onMessage(Session session, Message message) throws IOException, EncodeException {
-        message.setSender(users.get(session.getId()));
-        messageService.insertMessage(message);
+        if(message.getType().equals(Message.MSGTYPE_HELLO)){
+
+        }else if(message.getType().equals(Message.MSGTYPE_CHAT)){
+            message.setSender(users.get(session.getId()));
+            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            java.util.Date datetime = null;
+            try {
+                datetime = df.parse(message.getStringTime());
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            Timestamp t = new Timestamp(datetime.getTime());
+            message.setTime(t);
+            messageService.insertMessage(message);
+        }
         broadcast(message);
     }
 
     @OnClose
     public void onClose(Session session) throws IOException, EncodeException {
         chatEndpoints.remove(this);
+        String username = users.get(this.session.getId());
+        users.remove(this.session.getId());
+        broadcastBye(username);
 //        Message message = new Message();
 //        message.setFrom(users.get(session.getId()));
 //        message.setContent("Disconnected!");
 //        broadcast(message);
     }
+
 
     @OnError
     public void onError(Session session, Throwable throwable) {
@@ -81,4 +129,14 @@ public class WsController {
             }
         });
     }
+
+    private void unicast(Message message) throws IOException, EncodeException {
+                try {
+                    this.session.getBasicRemote()
+                            .sendObject(message);
+                } catch (IOException | EncodeException e) {
+                    e.printStackTrace();
+                }
+            }
+
 }

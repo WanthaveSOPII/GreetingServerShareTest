@@ -171,6 +171,7 @@ public class UserController {
         return "login";
     }
 
+    //现在没有用到这个
     @PostMapping (path = "/doLogin")
     public String doLogin(@RequestParam("userName") String username,
                           Model model,
@@ -200,6 +201,7 @@ public class UserController {
                             HttpServletRequest request) throws IOException {
 //       子颉：这里加一些登陆后，"hello"之前你想做的任何事
 
-        return "redirect:/hello";
+        //return "redirect:/hello";
+        return "/hello";
     }
 }

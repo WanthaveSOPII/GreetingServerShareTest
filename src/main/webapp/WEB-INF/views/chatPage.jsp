@@ -19,12 +19,12 @@
 <div class="wrapper">
     <div class="container">
         <div class="left">
-            <ul class="people">
-                <c:forEach items="${users}" var="usr" varStatus="st">
-                    <li class="person">
-                        <span class="name">${usr.username}</span>
-                    </li>
-                </c:forEach>
+            <ul class="people" id="people">
+<%--                <c:forEach items="${users}" var="usr" varStatus="st">--%>
+<%--                    <li class="person">--%>
+<%--                        <span class="name">${usr.username}</span>--%>
+<%--                    </li>--%>
+<%--                </c:forEach>--%>
             </ul>
         </div>
         <div class="right">
@@ -75,54 +75,150 @@
                     // var pathname = document.location.pathname;
 
                     ws = new WebSocket("ws://" +host  + "/wsPage/" + username);
+                    var time = nowTime();
+                    var json = JSON.stringify({
+                        "sender":username,
+                        "info":username+"进入了聊天室",
+                        "recver":"ALLUSER",
+                        "stringTime":time,
+                        "zoneID":Intl.DateTimeFormat().resolvedOptions().timeZone,
+                        "type":"hello"
+                    });
+                    setTimeout( function(){
+                        ws.send(json);
+                    }, 0.5 * 1000 )
+
 
                     ws.onmessage = function(event) {
                         console.log("收到 "+event.data);
-                        var chatdiv = document.getElementById("chat");
                         var message = JSON.parse(event.data);
-                        var newMessage = document.createElement('div');
-                        newMessage.setAttribute("id", "newMessage");
-                        newMessage.setAttribute("style", "height: 70px;");
-                        chatdiv.append(newMessage);
-                        var chaticon = document.createElement('div');
-                        var img = document.createElement('img');
-                        img.src="img/dog.png";
-                        img.setAttribute("class", "chaticon");
-                        chaticon.setAttribute("name", message.sender);
-                        if(message.sender == username){
-                            chaticon.setAttribute("class", "chaticon me");
-                        }else {
-                            chaticon.setAttribute("class", "chaticon you");
-                        }
-                        chaticon.append(img);
-                        newMessage.append(chaticon);
-                        var messageInfo = document.createElement('div');
-                        messageInfo.setAttribute("name", message.sender);
-                        if(message.sender == username) {
-                            messageInfo.setAttribute("class", "bubble me");
-                        }else {
-                            messageInfo.setAttribute("class", "bubble you");
-                        }
-                        messageInfo.innerHTML = message.info;
-                        newMessage.append(messageInfo);
+                        var chatdiv = document.getElementById("chat");
+                         if(message.type =="chat") {
+
+                            var newMessage = document.createElement('div');
+                            newMessage.setAttribute("id", "newMessage");
+                            newMessage.setAttribute("style", "height: 70px;");
+                            chatdiv.append(newMessage);
+                            var chaticon = document.createElement('div');
+                            var img = document.createElement('img');
+                            img.src = "img/dog.png";
+                            img.setAttribute("class", "chaticon");
+                            chaticon.setAttribute("name", message.sender);
+                            if (message.sender == username) {
+                                chaticon.setAttribute("class", "chaticon me");
+                            } else {
+                                chaticon.setAttribute("class", "chaticon you");
+                            }
+                            chaticon.append(img);
+                            newMessage.append(chaticon);
+                            var messageInfo = document.createElement('div');
+                            messageInfo.setAttribute("name", message.sender);
+                            if (message.sender == username) {
+                                messageInfo.setAttribute("class", "bubble me");
+                            } else {
+                                messageInfo.setAttribute("class", "bubble you");
+                            }
+                            messageInfo.innerHTML = message.info;
+                            newMessage.append(messageInfo);
+
+                        }else if(message.type == "hello"){
+                             if(hasUserInList(username))
+                                 return;
+                            addUserToList(message.sender);
+                            var newSysInfo = document.createElement('div');
+                            newSysInfo.setAttribute("class","conversation-start");
+                            var newPeopleInfo = document.createElement('span');
+                            newPeopleInfo.innerHTML = message.sender+"进入了聊天室";
+                            newSysInfo.append(newPeopleInfo);
+                            chatdiv.append(newSysInfo);
+
+                        }else if(message.type == "listUser"){
+                             var userList = message.info.split("/");
+                             console.log(userList);
+                             for (var i = 0 ;i <userList.length-1;i++){
+                                 if(userList[i]==username) {
+                                     continue;
+                                 }
+                                 addUserToList(userList[i]);
+
+                             }
+                         }else if(message.type == "bye"){
+                             var who = message.info;
+                             removeUserFromList(who);
+                         }
+
                         var scroll = document.getElementById('chat');
                         scroll.scrollTop = scroll.scrollHeight;
 
-
                         // log.innerHTML += message.from + " : " + message.content + "\n";
-                    };
+                    }
                 }
 
+                function addUserToList(username){
+                    if(hasUserInList(username))
+                        return;
+                    var newPeople = document.createElement('li');
+                    newPeople.setAttribute("class", "person");
+                    newPeople.setAttribute("id", "userList"+username);
+                    var people = document.getElementById("people");
+                    people.append(newPeople);
+                    var newPeopleName = document.createElement('span');
+                    newPeopleName.setAttribute("class", "name");
+                    newPeopleName.innerHTML = username;
+                    newPeople.append(newPeopleName);
+                }
+                function removeUserFromList(username){
+                    var closePeople = document.getElementById("userList"+username);
+                    if(closePeople!=null){
+                        closePeople.parentNode.removeChild(closePeople);
+                    }
+
+                }
+                function hasUserInList(username){
+                    var closePeople = document.getElementById("userList"+username);
+                    if(closePeople!=null){
+                        return true;
+                    }
+                    return false;
+                }
+                function nowTime(){
+                    var date = new Date(new Date().getTime() + new Date().getTimezoneOffset()*60*1000);
+                    //年 getFullYear()：四位数字返回年份
+                    var year = date.getFullYear();  //getFullYear()代替getYear()
+                    //月 getMonth()：0 ~ 11
+                    var month = date.getMonth() + 1;
+                    //日 getDate()：(1 ~ 31)
+                    var day = date.getDate();
+                    //时 getHours()：(0 ~ 23)
+                    var hour = date.getHours();
+                    //分 getMinutes()： (0 ~ 59)
+                    var minute = date.getMinutes();
+                    //秒 getSeconds()：(0 ~ 59)
+                    var second = date.getSeconds();
+
+                    var time =year + '-' + addZero(month) + '-' + addZero(day) + ' ' + addZero(hour) + ':' + addZero(minute) + ':' + addZero(second);
+
+                    return time;
+
+                }
                 function send() {
+
+                    var time =nowTime();
 
                     var content = document.getElementById("msg").value;
                     var json = JSON.stringify({
                         "info":content,
-                        "recver":"ALLUSER"
+                        "recver":"ALLUSER",
+                        "stringTime":time,
+                        "zoneID":Intl.DateTimeFormat().resolvedOptions().timeZone,
+                        "type":"chat"
                     });
                     console.log("发送信息 "+ content);
                     ws.send(json);
                     document.getElementById('msg').value=''
+                }
+                function addZero(s) {
+                    return s < 10 ? ('0' + s) : s;
                 }
                 window.onload = connect;
             </script>
