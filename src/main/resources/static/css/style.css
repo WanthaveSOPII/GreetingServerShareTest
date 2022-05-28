@@ -110,6 +110,7 @@ body {
   width: 100%;
   padding: 12px 10% 16px;
   cursor: pointer;
+  height: 60px;
   background-color: var(--white);
 }
 .container .left .people .person:after {
@@ -133,7 +134,7 @@ body {
 }
 .container .left .people .person .name {
   font-size: 14px;
-  line-height: 22px;
+  line-height: 30px;
   color: var(--dark);
   font-family: 'Source Sans Pro', sans-serif;
   font-weight: 600;

@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600" rel="stylesheet">
     <link rel="stylesheet" href="css/reset.min.css">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="javascript" href="js/reconnecting-websocket.js">
 
 </head>
 <body>
@@ -36,7 +37,7 @@
                     <div STYLE="height: 70px;">
 <%--                        <p class ="leftName" name="${msg.sender}">${msg.sender}</p>--%>
                         <div class="chaticon you" name="${msg.sender}">
-                            <img src="img/dog.png" class="chaticon">
+                            <img src="img/dog.png" class="chaticon" name="${msg.sender}">
                         </div>
                         <div class="bubble you" name="${msg.sender}">
                             ${msg.info}
@@ -68,12 +69,30 @@
             <script type="text/javascript">
                 var ws;
 
+                function setIconInStorage(){
+                    <c:forEach items="${users}" var="usr">
+                        sessionStorage.setItem("${usr.username}", "${usr.base64Icon}");
+                    </c:forEach>
+                }
+                function setUserIcon(){
+                    var img = document.getElementsByTagName("img");
+
+                    for (var i = 0, len = img.length; i < len; i++) {
+                        if(sessionStorage.getItem(img[i].name)!=null){
+                            img[i].setAttribute("src", "data:image/jpeg;base64,"+sessionStorage.getItem(img[i].name));
+                        }
+                    }
+                }
                 function connect() {
+                    console.log("${users}[0].username");
+                    setIconInStorage();
+                    setUserIcon();
                     var username = "${me}";
 
                     var host = document.location.host;
                     // var pathname = document.location.pathname;
 
+                    //ws = new ReconnectingWebSocket("ws://" +host  + "/wsPage/" + username);
                     ws = new WebSocket("ws://" +host  + "/wsPage/" + username);
                     var time = nowTime();
                     var json = JSON.stringify({
@@ -86,7 +105,7 @@
                     });
                     setTimeout( function(){
                         ws.send(json);
-                    }, 0.5 * 1000 )
+                    }, 0.5 * 1000 );
 
 
                     ws.onmessage = function(event) {
@@ -101,7 +120,7 @@
                             chatdiv.append(newMessage);
                             var chaticon = document.createElement('div');
                             var img = document.createElement('img');
-                            img.src = "img/dog.png";
+                            img.src = "data:image/jpeg;base64,"+sessionStorage.getItem(message.sender);
                             img.setAttribute("class", "chaticon");
                             chaticon.setAttribute("name", message.sender);
                             if (message.sender == username) {
@@ -166,6 +185,10 @@
                     newPeople.setAttribute("id", "userList"+username);
                     var people = document.getElementById("people");
                     people.append(newPeople);
+                    var img = document.createElement('img');
+                    img.src = "data:image/jpeg;base64,"+sessionStorage.getItem(username);
+                    img.setAttribute("class", "chaticon");
+                    newPeople.append(img);
                     var newPeopleName = document.createElement('span');
                     newPeopleName.setAttribute("class", "name");
                     newPeopleName.innerHTML = username;
