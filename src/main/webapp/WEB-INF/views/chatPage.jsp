@@ -13,19 +13,37 @@
     <link rel="stylesheet" href="css/reset.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="javascript" href="js/reconnecting-websocket.js">
+    <link rel="javascript" href="js/script.js">
 
 </head>
 <body>
 
 <div class="wrapper">
-    <div class="container">
-        <div class="left">
-            <ul class="people" id="people">
+    <div class="container" >
+        <div class="left" >
+            <ul class="people" id="people" oncontextmenu="openMenu(event)">
 <%--                <c:forEach items="${users}" var="usr" varStatus="st">--%>
 <%--                    <li class="person">--%>
 <%--                        <span class="name">${usr.username}</span>--%>
 <%--                    </li>--%>
 <%--                </c:forEach>--%>
+                <div class="right-click-menu">
+                    <ul class="right-click-menu-list">
+                        <li class="right-click-menu-item">
+                            <span>点赞</span>
+                        </li>
+                        <li class="right-click-menu-item">
+                            <span>收藏</span>
+                        </li>
+                        <li class="right-click-menu-item">
+                            <span>分享</span>
+                        </li>
+                        <li class="right-click-menu-item-divider"></li>
+                        <li class="right-click-menu-item right-click-menu-item-danger">
+                            <span>投币</span>
+                        </li>
+                    </ul>
+                </div>
             </ul>
         </div>
         <div class="right">
@@ -34,7 +52,7 @@
                     <span>Today, 5:38 PM</span>
                 </div>
                 <c:forEach items="${messages}" var="msg" varStatus="st">
-                    <div STYLE="height: 70px;">
+                    <div STYLE="height: 70px;" >
 <%--                        <p class ="leftName" name="${msg.sender}">${msg.sender}</p>--%>
                         <div class="chaticon you" name="${msg.sender}">
                             <img src="img/dog.png" class="chaticon" name="${msg.sender}">
@@ -46,6 +64,7 @@
                 </c:forEach>
 <%--                <div id="newdiv"></div>--%>
             </div>
+
             <script type="text/javascript">
                 var objs = document.getElementsByName("${me}");
                 var arr = [];
@@ -256,7 +275,32 @@
                 function addZero(s) {
                     return s < 10 ? ('0' + s) : s;
                 }
-                window.onload = connect;
+                // window.onload = connect;
+                window.onload = () => {
+                    connect();
+                    const menu = document.querySelector('.right-click-menu')
+                    const menuHeight = menu.offsetHeight - parseInt(getComputedStyle(menu)['paddingTop']) - parseInt(getComputedStyle(menu)['paddingBottom'])
+                    menu.style.height = '0'
+
+                    openMenu = e => {
+                        console.log('openMenu');
+                        e.preventDefault();
+
+                        menu.style.left = `${e.clientX}px`
+                        menu.style.top = `${e.clientY + 5}px`
+                        menu.style.height = `${menuHeight}px`
+                        menu.classList.add('right-click-is-active')
+
+                        return false
+                    }
+
+                    colseMenu = () => {
+                        menu.style.height = '0'
+                        menu.classList.remove('is-active')
+                    }
+
+                    window.onclick = () => colseMenu()
+                }
             </script>
 
 

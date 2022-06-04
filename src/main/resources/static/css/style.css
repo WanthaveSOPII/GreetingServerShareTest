@@ -441,3 +441,64 @@ body {
     opacity: 1;
   }
 }
+
+.right-click-menu {
+  position: absolute;
+  width: 152px;
+  padding: 4px;
+  box-shadow: 0 1px 4px rgba(28, 28, 32, .04), 0 8px 24px rgba(28, 28, 32, .12);
+  border-radius: 10px;
+  background: white;
+  opacity: 0;
+  visibility: hidden;
+  overflow: hidden;
+  transition: opacity .2s ease, height .3s ease, visibility .3s ease;
+}
+
+.right-click-is-active{
+  opacity: 1;
+  visibility: visible;
+}
+
+.right-click-menu-list {
+  list-style: none;
+}
+
+.right-click-menu-item {
+  line-height: 22px;
+  color: #25262b;
+  font-size: 14px;
+  border-radius: 5px;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  transition: background .3s ease;
+}
+
+.right-click-menu-item:hover {
+  background: #f5f5f6;
+}
+
+.right-click-menu-item svg {
+  margin-right: 8px;
+}
+
+.right-click-menu-item-divider {
+  height: 1px;
+  margin: 4px 8px;
+  background: #f5f5f6;
+}
+
+.right-click-menu-item-danger {
+  color: #ff6f66;
+}
+
+.right-click-menu-item-danger svg path {
+  fill: #ff6f66;
+}
+
+.right-click-menu-item-danger:hover {
+  background: #fdd9d8;
+}
