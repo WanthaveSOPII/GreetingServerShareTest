@@ -12,16 +12,14 @@
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600" rel="stylesheet">
     <link rel="stylesheet" href="css/reset.min.css">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="javascript" href="js/reconnecting-websocket.js">
-    <link rel="javascript" href="js/script.js">
-
+    <script type="text/javascript" src="js/reconnecting-websocket.js"></script>
 </head>
 <body>
 
 <div class="wrapper">
     <div class="container" >
         <div class="left" >
-            <ul class="people" id="people" oncontextmenu="openMenu(event)">
+            <ul class="people" id="people" > <%--oncontextmenu="openMenu()">--%>
 <%--                <c:forEach items="${users}" var="usr" varStatus="st">--%>
 <%--                    <li class="person">--%>
 <%--                        <span class="name">${usr.username}</span>--%>
@@ -111,8 +109,9 @@
                     var host = document.location.host;
                     // var pathname = document.location.pathname;
 
-                    //ws = new ReconnectingWebSocket("ws://" +host  + "/wsPage/" + username);
-                    ws = new WebSocket("ws://" +host  + "/wsPage/" + username);
+                    //reconnect可以用了。以前引用javascript 的句法写错了
+                    ws = new ReconnectingWebSocket("ws://" +host  + "/wsPage/" + username);
+                    //ws = new WebSocket("ws://" +host  + "/wsPage/" + username);
                     var time = nowTime();
                     var json = JSON.stringify({
                         "sender":username,
@@ -275,31 +274,41 @@
                 function addZero(s) {
                     return s < 10 ? ('0' + s) : s;
                 }
-                // window.onload = connect;
+
                 window.onload = () => {
                     connect();
+                    const peopleDiv = document.getElementById('people');
                     const menu = document.querySelector('.right-click-menu')
                     const menuHeight = menu.offsetHeight - parseInt(getComputedStyle(menu)['paddingTop']) - parseInt(getComputedStyle(menu)['paddingBottom'])
+
+                    //hide the menu
                     menu.style.height = '0'
 
-                    openMenu = e => {
-                        console.log('openMenu');
+                    //右键开菜单加在这里。以前的用法过时了，传不了e
+                    peopleDiv.addEventListener("contextmenu", (e) => {
+                        console.log('openMenu '+menuHeight);
                         e.preventDefault();
 
-                        menu.style.left = `${e.clientX}px`
-                        menu.style.top = `${e.clientY + 5}px`
-                        menu.style.height = `${menuHeight}px`
-                        menu.classList.add('right-click-is-active')
+                        //以前的赋值写错了
+                        menu.style.left = e.clientX+'px';
+                        menu.style.top = (e.clientY + 5)+'px';
+                        menu.style.height = menuHeight+'px';
+                        //把css class 加给menu
+                        menu.classList.add('right-click-is-active');
 
-                        return false
+                        return false;
+                    });
+
+                    window.onclick = () => {
+                        console.log('closeMenu');
+
+                        menu.style.height = '0';
+                        //抄程序都抄错了！！！
+                        <%--menu.classList.remove('is-active');--%>
+                        //把css class 从menu显示中去掉
+                        menu.classList.remove('right-click-is-active');
                     }
 
-                    colseMenu = () => {
-                        menu.style.height = '0'
-                        menu.classList.remove('is-active')
-                    }
-
-                    window.onclick = () => colseMenu()
                 }
             </script>
 

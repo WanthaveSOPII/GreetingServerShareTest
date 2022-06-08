@@ -201,7 +201,9 @@ public class UserController {
                             HttpServletRequest request) throws IOException {
 //       子颉：这里加一些登陆后，"hello"之前你想做的任何事
 
-        //return "redirect:/hello";
-        return "/hello";
+        //redirect 和 直接 hello的区别是所有在HelloController里的UserInfo操作都没了， hello页面
+        //里需要的Nickname也没了。还是用回redirect
+        return "redirect:/hello";
+        //return "/hello";
     }
 }
