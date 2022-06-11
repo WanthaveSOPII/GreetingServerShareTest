@@ -12,22 +12,18 @@
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600" rel="stylesheet">
     <link rel="stylesheet" href="css/reset.min.css">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="javascript" href="js/reconnecting-websocket.js">
-    <link rel="javascript" href="js/script.js">
-
+    <script type="text/javascript" src="js/reconnecting-websocket.js"></script>
 </head>
 <body>
 
 <div class="wrapper">
     <div class="container" >
-        <div class="left" >
-            <ul class="people" id="people" oncontextmenu="openMenu(event)">
-<%--                <c:forEach items="${users}" var="usr" varStatus="st">--%>
-<%--                    <li class="person">--%>
-<%--                        <span class="name">${usr.username}</span>--%>
-<%--                    </li>--%>
-<%--                </c:forEach>--%>
-                <div class="right-click-menu">
+        <div class="usermenu"><div style="float:left;font-size: 22px;">用户</div></div>
+        <div class="left" style="height: 375px;clear: both;">
+
+            <ul class="usrgrp" id="people">
+
+                <div class="right-click-menu" style="z-index:999">
                     <ul class="right-click-menu-list">
                         <li class="right-click-menu-item">
                             <span>点赞</span>
@@ -46,11 +42,22 @@
                 </div>
             </ul>
         </div>
+        <div class="groupmenu" style="clear: both;"><div style="float:left;font-size: 22px;">群组</div> <button style="float:right">添加群组</button></div>
+        <div class="left" style="height: 375px;clear: both;">
+            <ul class="usrgrp" id="group">
+                            <c:forEach items="${groups}" var="grp" varStatus="st">
+                                <li class="person" id="grouplist${grp.name}">
+                                    <span class="name">${grp.name}</span>
+                                </li>
+                            </c:forEach>
+            </ul>
+        </div>
         <div class="right">
             <div class="chat" id="chat">
                 <div class="conversation-start">
                     <span>Today, 5:38 PM</span>
                 </div>
+
                 <c:forEach items="${messages}" var="msg" varStatus="st">
                     <div STYLE="height: 70px;" >
 <%--                        <p class ="leftName" name="${msg.sender}">${msg.sender}</p>--%>
@@ -87,6 +94,8 @@
 
             <script type="text/javascript">
                 var ws;
+                var personSelElemId;
+                var groupSelElemId;
 
                 function setIconInStorage(){
                     <c:forEach items="${users}" var="usr">
@@ -111,8 +120,8 @@
                     var host = document.location.host;
                     // var pathname = document.location.pathname;
 
-                    //ws = new ReconnectingWebSocket("ws://" +host  + "/wsPage/" + username);
-                    ws = new WebSocket("ws://" +host  + "/wsPage/" + username);
+                    ws = new ReconnectingWebSocket("ws://" +host  + "/wsPage/" + username);
+                    //ws = new WebSocket("ws://" +host  + "/wsPage/" + username);
                     var time = nowTime();
                     var json = JSON.stringify({
                         "sender":username,
@@ -275,31 +284,63 @@
                 function addZero(s) {
                     return s < 10 ? ('0' + s) : s;
                 }
-                // window.onload = connect;
                 window.onload = () => {
-                    connect();
+
+                    const peopleDiv = document.getElementById('people');
+                    const groupDiv = document.getElementById('group');
                     const menu = document.querySelector('.right-click-menu')
                     const menuHeight = menu.offsetHeight - parseInt(getComputedStyle(menu)['paddingTop']) - parseInt(getComputedStyle(menu)['paddingBottom'])
                     menu.style.height = '0'
 
-                    openMenu = e => {
-                        console.log('openMenu');
-                        e.preventDefault();
+                    connect();
+                        //右键开菜单加在这里。以前的用法过时了，传不了e
+                    peopleDiv.addEventListener("contextmenu",openUserRightClickMenu);
 
-                        menu.style.left = `${e.clientX}px`
-                        menu.style.top = `${e.clientY + 5}px`
-                        menu.style.height = `${menuHeight}px`
-                        menu.classList.add('right-click-is-active')
+                    peopleDiv.addEventListener("mouseover", function( e ) {
+                        // highlight the mouseenter target
+                        if((e.target.parentElement.id=="people")&&(e.target.id!="")){
+                            personSelElemId = e.target.id;
+                            // console.log(personSelElemId);
+                            // console.log(e.target.parentElement.id);
+                            // console.log("---------");
+                        }
 
-                        return false
+                    });
+
+                    groupDiv.addEventListener("mouseover", function( e ) {
+                        // highlight the mouseenter target
+                        if((e.target.parentElement.id=="group")&&(e.target.id!="")){
+                            groupSelElemId = e.target.id;
+                            // console.log(groupSelElemId);
+                            // console.log(e.target.parentElement.id);
+                            // console.log("---------");
+                        }
+
+                    });
+
+                    function closeUserRightClickMenu(){
+                        console.log('closeMenu');
+                        menu.style.height = '0';
+                        menu.classList.remove('right-click-is-active');
                     }
 
-                    colseMenu = () => {
-                        menu.style.height = '0'
-                        menu.classList.remove('is-active')
-                    }
+                    function openUserRightClickMenu(e){
+                            console.log('openMenu '+menuHeight);
+                            e.preventDefault();
 
-                    window.onclick = () => colseMenu()
+                            //menu.style.left = (e.clientX-500)+'px';
+                            menu.style.left = (250)+'px';
+                            menu.style.top = (e.clientY-80)+'px';
+                            //menu.style.top = (0)+'px';
+                            menu.style.height = menuHeight+'px';
+                            //把css class 加给menu
+                            menu.classList.add('right-click-is-active');
+
+                            return false;
+                    }
+                    window.onclick = closeUserRightClickMenu;
+
+
                 }
             </script>
 

@@ -2,6 +2,7 @@ package com.example.greetingserver.controller;
 
 import com.example.greetingserver.pojo.Message;
 import com.example.greetingserver.pojo.User;
+import com.example.greetingserver.service.GroupService;
 import com.example.greetingserver.service.MessageService;
 import com.example.greetingserver.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,7 @@ public class WsController {
 
     @Autowired
     UserService userService;
+    GroupService groupService;
 
     private Session session;
     private static final Set<WsController> chatEndpoints = new CopyOnWriteArraySet<>();

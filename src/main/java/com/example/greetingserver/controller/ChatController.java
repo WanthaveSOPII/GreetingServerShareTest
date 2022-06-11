@@ -1,7 +1,9 @@
 package com.example.greetingserver.controller;
 
+import com.example.greetingserver.pojo.Group;
 import com.example.greetingserver.pojo.Message;
 import com.example.greetingserver.pojo.User;
+import com.example.greetingserver.service.GroupService;
 import com.example.greetingserver.service.MessageService;
 import com.example.greetingserver.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,9 @@ public class ChatController {
     @Autowired
     UserService userService;
 
+    @Autowired
+    GroupService groupService;
+
     @RequestMapping("/chatPage")
     public String chatPage(Model model, HttpServletRequest req) {
         String me = "zhangsan";
@@ -40,6 +45,8 @@ public class ChatController {
 
         List<User> users = userService.findAll();
         model.addAttribute("users", users);
+        List<Group> groups = groupService.findAll();
+        model.addAttribute("groups", groups);
         List<Message> messages = messageService.findTopTen();
         model.addAttribute("messages", messages);
         model.addAttribute("me", me);

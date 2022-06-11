@@ -11,7 +11,7 @@ Hi Jsp,现在时间是   ${now}
     <a href="user/addUser">添加用户</a>
 </p>
 <p>
-    <a href="chatPage">聊天窗</a>
+    <a href="/chatPage">聊天窗</a>
 </p>
 <p>
     <a href="user/login">登录</a>

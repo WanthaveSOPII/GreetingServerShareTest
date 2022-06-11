@@ -18,6 +18,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
 
+        //加上这一句，http://localhost:8080/ 就会直接到登录了
+        registry.addViewController("/").setViewName("redirect:/user/login");
         registry.addViewController("/accessdenied").setViewName("accessdenied");
 
     }
