@@ -62,13 +62,13 @@ public class WsController {
         this.unicast(message);
     }
 
-    public static void broadcastBye(String username) throws IOException, EncodeException{
+    public void broadcastBye(String username) throws IOException, EncodeException{
         Message message = new Message();
         message.setType(Message.MSGTYPE_BYE);
         message.setSender("SYSTEM");
         message.setRecver("ALLUSER");
         message.setInfo(username);
-        broadcast(message);
+        this.unicast(message);
     }
 
     private String allUsersList(){
@@ -97,6 +97,8 @@ public class WsController {
             Timestamp t = new Timestamp(datetime.getTime());
             message.setTime(t);
             messageService.insertMessage(message);
+        }else if(message.getType().equals(Message.MSGTYPE_GETGROUPMEMBER)){
+
         }
         broadcast(message);
     }

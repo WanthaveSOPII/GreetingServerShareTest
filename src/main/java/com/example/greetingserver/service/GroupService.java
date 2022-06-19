@@ -2,6 +2,7 @@ package com.example.greetingserver.service;
 
 import com.example.greetingserver.mapper.GroupMapper;
 import com.example.greetingserver.pojo.Group;
+import com.example.greetingserver.pojo.GroupMember;
 import com.example.greetingserver.pojo.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,4 +21,9 @@ public class GroupService {
 //        }
         return groups;
     };
+
+    public List<GroupMember> findUserInGroup(String groupname){
+        List<GroupMember> userInGroup = groupMapper.findUserInGroup(groupname);
+        return userInGroup;
+    }
 }

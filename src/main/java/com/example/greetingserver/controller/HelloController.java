@@ -39,6 +39,14 @@ public class HelloController {
             m.addAttribute("adminonly",adminonly);
         }
         return "hello";
+
         //return studentProperties.getName() + studentProperties.getAge();
     }
+
+    @RequestMapping("/test")
+    public String testUI(){
+        System.out.println("test");
+        return "test";}
+
+
 }

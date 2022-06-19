@@ -30,12 +30,13 @@ public class UserController {
     @Autowired
     UserService userService;
 
-
     @PreAuthorize("hasAuthority('admin')")
     @RequestMapping("/addUser")
     public String addUserUI(){
         return "addUser";
     }
+
+
 
     @PostMapping (path = "/doAddUser")
     public String addUser(@RequestParam("userName") String username,

@@ -7,6 +7,7 @@ public class Message {
     public static final String MSGTYPE_HELLO = "hello";
     public static final String MSGTYPE_BYE = "bye";
     public static final String MSGTYPE_LISTUSER = "listUser";
+    public static final String MSGTYPE_GETGROUPMEMBER = "getGroupMember";
 
 
     int id;

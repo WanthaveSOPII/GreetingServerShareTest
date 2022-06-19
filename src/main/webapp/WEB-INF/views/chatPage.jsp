@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="css/reset.min.css">
     <link rel="stylesheet" href="css/style.css">
     <script type="text/javascript" src="js/reconnecting-websocket.js"></script>
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
 </head>
 <body>
 
@@ -45,8 +46,25 @@
         <div class="groupmenu" style="clear: both;"><div style="float:left;font-size: 22px;">群组</div> <button style="float:right">添加群组</button></div>
         <div class="left" style="height: 375px;clear: both;">
             <ul class="usrgrp" id="group">
+                <div class="right-click-menu" style="z-index:999">
+                    <ul class="right-click-menu-list">
+                        <li class="right-click-menu-item">
+                            <span>点赞</span>
+                        </li>
+                        <li class="right-click-menu-item">
+                            <span>123131313123</span>
+                        </li>
+                        <li class="right-click-menu-item">
+                            <span>分享</span>
+                        </li>
+                        <li class="right-click-menu-item-divider"></li>
+                        <li class="right-click-menu-item right-click-menu-item-danger">
+                            <span>投币</span>
+                        </li>
+                    </ul>
+                </div>
                             <c:forEach items="${groups}" var="grp" varStatus="st">
-                                <li class="person" id="grouplist${grp.name}">
+                                <li class="person" id="grouplist${grp.name}" onclick="getGroupMember('${grp.name}')">
                                     <span class="name">${grp.name}</span>
                                 </li>
                             </c:forEach>
@@ -236,6 +254,18 @@
                     }
                     return false;
                 }
+                // function getGroupMember(groupname){
+                //     var time = nowTime();
+                //     var json = JSON.stringify({
+                //         "sender":username,
+                //         "info":groupname,
+                //         "recver":"SYSTEM",
+                //         "stringTime":time,
+                //         "zoneID":Intl.DateTimeFormat().resolvedOptions().timeZone,
+                //         "type":"getGroupMember"
+                //     });
+                //     ws.send(json);
+                // }
                 function systemNotification(info){
                     var chatdiv = document.getElementById("chat");
                     var newSysInfo = document.createElement('div');
@@ -284,12 +314,51 @@
                 function addZero(s) {
                     return s < 10 ? ('0' + s) : s;
                 }
+                function getGroupMember(groupname){
+                    console.log("clicked");
+                    var url = "/group/getGroupMember";
+                   // var data = '{"name":"'+groupname+'","id":"11"}';
+                    var data = '{"name":"'+groupname+'"}';
+                    $.ajax({
+                        headers:{'Content-Type':'application/json;charset=utf8'},
+                        type: "POST",
+                        url: url,
+                        data: data,
+                        //headers:{'Content-Type':'application/json;charset=utf8'},
+                        dataType: "json",
+                        success: function (jdata, status) {
+                            console.log("Status: " + status);
+                            console.log(jdata);
+                            $("#rtn").html("返回结果：" + JSON.stringify(jdata));
+                            var e = document.getElementById("people");
+                            var child = e.lastElementChild;
+                            while (child) {
+                                e.removeChild(child);
+                                child = e.lastElementChild;
+                            }
+                            var userList = jdata.nameList.split("/");
+                            console.log(userList);
+                            for (var i = 0 ;i <userList.length-1;i++){
+                                addUserToList(userList[i]);
+
+                            }
+                        },
+                        error: function (xhr, status) {
+                            console.log("Status: " + status);
+                            console.log(xhr);
+                            window.alert("请求数据失败");
+                        }
+                    });
+                }
                 window.onload = () => {
 
                     const peopleDiv = document.getElementById('people');
                     const groupDiv = document.getElementById('group');
                     const menu = document.querySelector('.right-click-menu')
                     const menuHeight = menu.offsetHeight - parseInt(getComputedStyle(menu)['paddingTop']) - parseInt(getComputedStyle(menu)['paddingBottom'])
+                    var usrselectedMenu;
+                    var grpselectedMenu;
+
                     menu.style.height = '0'
 
                     connect();
@@ -299,7 +368,15 @@
                     peopleDiv.addEventListener("mouseover", function( e ) {
                         // highlight the mouseenter target
                         if((e.target.parentElement.id=="people")&&(e.target.id!="")){
-                            personSelElemId = e.target.id;
+                            if(personSelElemId!=e.target.id) {
+                                if(usrselectedMenu!=null) {
+                                    usrselectedMenu.classList.remove('active');
+                                }
+                                personSelElemId = e.target.id;
+                                usrselectedMenu = document.getElementById(e.target.id);
+
+                                closeUserRightClickMenu();
+                            }
                             // console.log(personSelElemId);
                             // console.log(e.target.parentElement.id);
                             // console.log("---------");
@@ -309,34 +386,45 @@
 
                     groupDiv.addEventListener("mouseover", function( e ) {
                         // highlight the mouseenter target
+
                         if((e.target.parentElement.id=="group")&&(e.target.id!="")){
-                            groupSelElemId = e.target.id;
+                            if(groupSelElemId!=e.target.id) {
+                                if(grpselectedMenu!=null) {
+                                    grpselectedMenu.classList.remove('active');
+                                }
+                                groupSelElemId = e.target.id;
+                                grpselectedMenu = document.getElementById(e.target.id);
+                                closeUserRightClickMenu();
+                            }
+
                             // console.log(groupSelElemId);
                             // console.log(e.target.parentElement.id);
                             // console.log("---------");
                         }
 
                     });
-
+                    groupDiv.addEventListener("contextmenu",openUserRightClickMenu);
                     function closeUserRightClickMenu(){
+                        usrselectedMenu.classList.remove('active');
                         console.log('closeMenu');
                         menu.style.height = '0';
                         menu.classList.remove('right-click-is-active');
                     }
 
                     function openUserRightClickMenu(e){
-                            console.log('openMenu '+menuHeight);
-                            e.preventDefault();
+                        usrselectedMenu.classList.add('active');
+                        console.log('openMenu '+menuHeight);
+                        e.preventDefault();
 
-                            //menu.style.left = (e.clientX-500)+'px';
-                            menu.style.left = (250)+'px';
-                            menu.style.top = (e.clientY-80)+'px';
-                            //menu.style.top = (0)+'px';
-                            menu.style.height = menuHeight+'px';
-                            //把css class 加给menu
-                            menu.classList.add('right-click-is-active');
+                        //menu.style.left = (e.clientX-500)+'px';
+                        menu.style.left = (250)+'px';
+                        menu.style.top = (e.clientY-80)+'px';
+                        //menu.style.top = (0)+'px';
+                        menu.style.height = menuHeight+'px';
+                        //把css class 加给menu
+                        menu.classList.add('right-click-is-active');
 
-                            return false;
+                        return false;
                     }
                     window.onclick = closeUserRightClickMenu;
 
