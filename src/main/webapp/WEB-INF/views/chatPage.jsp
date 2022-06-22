@@ -12,8 +12,10 @@
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600" rel="stylesheet">
     <link rel="stylesheet" href="css/reset.min.css">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/addGroupWindow.css">
     <script type="text/javascript" src="js/reconnecting-websocket.js"></script>
     <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+<%--    <script type="text/javascript" src="js/addGroupWindow.js"></script>--%>
 </head>
 <body>
 
@@ -24,16 +26,13 @@
 
             <ul class="usrgrp" id="people">
 
-                <div class="right-click-menu" style="z-index:999">
+                <div class="right-click-menu" id="peopleMenu" style="z-index:999">
                     <ul class="right-click-menu-list">
                         <li class="right-click-menu-item">
-                            <span>点赞</span>
+                            <span>踢出群组</span>
                         </li>
                         <li class="right-click-menu-item">
-                            <span>收藏</span>
-                        </li>
-                        <li class="right-click-menu-item">
-                            <span>分享</span>
+                            <span>改变昵称</span>
                         </li>
                         <li class="right-click-menu-item-divider"></li>
                         <li class="right-click-menu-item right-click-menu-item-danger">
@@ -43,19 +42,26 @@
                 </div>
             </ul>
         </div>
-        <div class="groupmenu" style="clear: both;"><div style="float:left;font-size: 22px;">群组</div> <button style="float:right">添加群组</button></div>
+        <div class="groupmenu" style="clear: both;"><div style="float:left;font-size: 22px;">群组</div>
+            <button style="float:right" id="addGroupBtn">添加群组</button>
+            <div class="addGroupform">
+                <form action="/group/doAddGroup" method="post"  enctype ="multipart/form-data">
+                    <div class="addGroupInput"><div class="login_logo">添加群组</div><div class="close">X</div></div>
+                    <hr>
+                    <div class="addGroupInput"><input style="width:280px;height:30px;border-radius: 5px;border:1px solid  #e5dfdf;" type="text" name="groupname" placeholder="&nbsp;组名"></div>
+                    <div class="addGroupInput"><input class="submit_1" type="submit" value="提&nbsp;交"></div>
+                </form>
+            </div>
+        </div>
         <div class="left" style="height: 375px;clear: both;">
             <ul class="usrgrp" id="group">
-                <div class="right-click-menu" style="z-index:999">
+                <div class="right-click-menu" id="grpMenu" style="z-index:999">
                     <ul class="right-click-menu-list">
                         <li class="right-click-menu-item">
-                            <span>点赞</span>
+                            <span>加入</span>
                         </li>
                         <li class="right-click-menu-item">
-                            <span>123131313123</span>
-                        </li>
-                        <li class="right-click-menu-item">
-                            <span>分享</span>
+                            <span>退出</span>
                         </li>
                         <li class="right-click-menu-item-divider"></li>
                         <li class="right-click-menu-item right-click-menu-item-danger">
@@ -350,11 +356,37 @@
                         }
                     });
                 }
+
+                function addGroup(groupname){
+                    console.log("addGroup");
+                    var url = "/group/doAddGroup";
+                    var data = '{"name":"'+groupname+'"}';
+                    $.ajax({
+                        headers:{'Content-Type':'application/json;charset=utf8'},
+                        type: "POST",
+                        url: url,
+                        data: data,
+                        dataType: "json",
+                        success: function (jdata, status) {
+                            console.log("Status: " + status);
+                            console.log(jdata);
+                            $("#rtn").html("返回结果：" + JSON.stringify(jdata));
+                            console.log("add Group action success");
+                        },
+                        error: function (xhr, status) {
+                            console.log("Status: " + status);
+                            console.log(xhr);
+                            window.alert("请求数据失败");
+                        }
+                    });
+                }
+
                 window.onload = () => {
 
                     const peopleDiv = document.getElementById('people');
                     const groupDiv = document.getElementById('group');
                     const menu = document.querySelector('.right-click-menu')
+                    const grpmenu = document.getElementById('grpMenu')
                     const menuHeight = menu.offsetHeight - parseInt(getComputedStyle(menu)['paddingTop']) - parseInt(getComputedStyle(menu)['paddingBottom'])
                     var usrselectedMenu;
                     var grpselectedMenu;
@@ -362,6 +394,16 @@
                     menu.style.height = '0'
 
                     connect();
+
+                    var btn=document.getElementById("addGroupBtn");
+                    var close=document.getElementsByClassName("close");
+                    var form=document.getElementsByClassName("addGroupform");
+                    btn.addEventListener('click',function(){
+                        form[0].className="addGroupform open";
+                    })
+                    close[0].addEventListener('click',function(){
+                        form[0].className="addGroupform";
+                    })
                         //右键开菜单加在这里。以前的用法过时了，传不了e
                     peopleDiv.addEventListener("contextmenu",openUserRightClickMenu);
 
@@ -375,7 +417,7 @@
                                 personSelElemId = e.target.id;
                                 usrselectedMenu = document.getElementById(e.target.id);
 
-                                closeUserRightClickMenu();
+                                closeRightClickMenu();
                             }
                             // console.log(personSelElemId);
                             // console.log(e.target.parentElement.id);
@@ -394,7 +436,7 @@
                                 }
                                 groupSelElemId = e.target.id;
                                 grpselectedMenu = document.getElementById(e.target.id);
-                                closeUserRightClickMenu();
+                                closeRightClickMenu();
                             }
 
                             // console.log(groupSelElemId);
@@ -403,12 +445,16 @@
                         }
 
                     });
-                    groupDiv.addEventListener("contextmenu",openUserRightClickMenu);
-                    function closeUserRightClickMenu(){
+                    //groupDiv.addEventListener("contextmenu",openUserRightClickMenu);
+                    groupDiv.addEventListener("contextmenu",openGroupRightClickMenu);
+                    function closeRightClickMenu(){
                         usrselectedMenu.classList.remove('active');
+                        grpselectedMenu.classList.remove('active');
                         console.log('closeMenu');
                         menu.style.height = '0';
                         menu.classList.remove('right-click-is-active');
+                        grpmenu.style.height = '0';
+                        grpmenu.classList.remove('right-click-is-active');
                     }
 
                     function openUserRightClickMenu(e){
@@ -426,7 +472,22 @@
 
                         return false;
                     }
-                    window.onclick = closeUserRightClickMenu;
+                    function openGroupRightClickMenu(e){
+                        grpselectedMenu.classList.add('active');
+                        console.log('openMenu '+menuHeight);
+                        e.preventDefault();
+
+                        //menu.style.left = (e.clientX-500)+'px';
+                        grpmenu.style.left = (250)+'px';
+                        grpmenu.style.top = (e.clientY-80)+'px';
+                        //menu.style.top = (0)+'px';
+                        grpmenu.style.height = menuHeight+'px';
+                        //把css class 加给menu
+                        grpmenu.classList.add('right-click-is-active');
+
+                        return false;
+                    }
+                    window.onclick = closeRightClickMenu;
 
 
                 }

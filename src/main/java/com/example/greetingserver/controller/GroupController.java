@@ -6,10 +6,10 @@ import com.example.greetingserver.pojo.GroupMemberQuery;
 import com.example.greetingserver.service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -32,6 +32,19 @@ public class GroupController {
             nameList+= iterator.next().getUsername()+"/";
         }
         map.put("nameList", nameList);
+        return map;
+    }
+
+    @PostMapping(path = "/doAddGroup")
+    public Map<String, Object> createGroup(@RequestParam("groupname") String groupname, HttpServletRequest servletRequest) throws IOException {
+        Map<String, Object> map = new HashMap<>();
+        String username = servletRequest.getUserPrincipal().getName();
+        List<Integer> createGroupFlag = groupService.createGroup(groupname,1,username);
+        if(createGroupFlag.get(0) > 0){
+            map.put("createGroupFlag", "success");
+        }else {
+            map.put("createGroupFlag", "error");
+        }
         return map;
     }
 

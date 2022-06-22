@@ -7,7 +7,8 @@ public class Group {
     String name;
     java.util.Date createTime;
     String stringCreateTime;
-    String groupOwnerid;
+    Integer groupOwnerid;
+    String ownername;
     String active;
     String type;
     String status;
@@ -44,12 +45,20 @@ public class Group {
         this.stringCreateTime = stringCreateTime;
     }
 
-    public String getGroupOwnerid() {
+    public Integer getGroupOwnerid() {
         return groupOwnerid;
     }
 
-    public void setGroupOwnerid(String groupOwnerid) {
+    public void setGroupOwnerid(Integer groupOwnerid) {
         this.groupOwnerid = groupOwnerid;
+    }
+
+    public String getOwnername() {
+        return ownername;
+    }
+
+    public void setOwnername(String ownername) {
+        this.ownername = ownername;
     }
 
     public String getActive() {

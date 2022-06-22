@@ -14,4 +14,10 @@ public interface GroupMapper {
 
     @Select("CALL findUserInGroup(#{groupname})")
     List<GroupMember> findUserInGroup(String groupname);
+
+//    @Select("CALL createGroup(#{groupname},#{type},#{ownername})")
+//    List<Integer> createGroup(String groupname, Integer type,String ownername);
+
+    @Select("CALL createGroup(#{name},#{type},#{ownername})")
+    List<Integer> createGroup(Group group);
 }
