@@ -36,10 +36,10 @@ public class GroupController {
     }
 
     @PostMapping(path = "/doAddGroup")
-    public Map<String, Object> createGroup(@RequestParam("groupname") String groupname, HttpServletRequest servletRequest) throws IOException {
+    public Map<String, Object> createGroup(@RequestBody Group group, HttpServletRequest servletRequest) throws IOException {
         Map<String, Object> map = new HashMap<>();
         String username = servletRequest.getUserPrincipal().getName();
-        List<Integer> createGroupFlag = groupService.createGroup(groupname,1,username);
+        List<Integer> createGroupFlag = groupService.createGroup(group.getName(),1,username);
         if(createGroupFlag.get(0) > 0){
             map.put("createGroupFlag", "success");
         }else {

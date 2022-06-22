@@ -1,11 +1,11 @@
 class RightClickMenu{
     constructor(name) {
         this.name = name;
-       this.listener = groupDiv.addEventListener("contextmenu",this.openRightClickMenu);
-       this.selectedMenu=null;
-        this.menu = document.getElementById(name+"Menu")
-       this.selectedMenu=null;
         this.Div = document.getElementById(name+"Div");
+        this.menu = document.getElementById(name+"Menu")
+        this.selectedMenu=null;
+        this.selectedMenu=null;
+       this.listener = this.Div.addEventListener("contextmenu",this.openRightClickMenu);
         this.SelElemId=null;
         this.menuHeight = this.menu.offsetHeight - parseInt(getComputedStyle(this.menu)['paddingTop']) - parseInt(getComputedStyle(this.menu)['paddingBottom'])
     }

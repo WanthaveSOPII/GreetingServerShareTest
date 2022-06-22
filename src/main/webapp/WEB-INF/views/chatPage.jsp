@@ -45,12 +45,12 @@
         <div class="groupmenu" style="clear: both;"><div style="float:left;font-size: 22px;">群组</div>
             <button style="float:right" id="addGroupBtn">添加群组</button>
             <div class="addGroupform">
-                <form action="/group/doAddGroup" method="post"  enctype ="multipart/form-data">
+<%--                <form action="/group/doAddGroup" method="post"  enctype ="multipart/form-data">--%>
                     <div class="addGroupInput"><div class="login_logo">添加群组</div><div class="close">X</div></div>
                     <hr>
                     <div class="addGroupInput"><input style="width:280px;height:30px;border-radius: 5px;border:1px solid  #e5dfdf;" type="text" name="groupname" placeholder="&nbsp;组名"></div>
-                    <div class="addGroupInput"><input class="submit_1" type="submit" value="提&nbsp;交"></div>
-                </form>
+                    <div class="addGroupInput"><button class="submit_1" type="submit" onclick="addGroup(document.getElementsByName('groupname')[0].value)">添&nbsp;加</button></div>
+<%--                </form>--%>
             </div>
         </div>
         <div class="left" style="height: 375px;clear: both;">
@@ -358,7 +358,7 @@
                 }
 
                 function addGroup(groupname){
-                    console.log("addGroup");
+                    console.log("addGroup " + groupname);
                     var url = "/group/doAddGroup";
                     var data = '{"name":"'+groupname+'"}';
                     $.ajax({
@@ -448,8 +448,12 @@
                     //groupDiv.addEventListener("contextmenu",openUserRightClickMenu);
                     groupDiv.addEventListener("contextmenu",openGroupRightClickMenu);
                     function closeRightClickMenu(){
-                        usrselectedMenu.classList.remove('active');
-                        grpselectedMenu.classList.remove('active');
+                        if(usrselectedMenu!=null) {
+                            usrselectedMenu.classList.remove('active');
+                        }
+                        if(grpselectedMenu!=null) {
+                            grpselectedMenu.classList.remove('active');
+                        }
                         console.log('closeMenu');
                         menu.style.height = '0';
                         menu.classList.remove('right-click-is-active');
