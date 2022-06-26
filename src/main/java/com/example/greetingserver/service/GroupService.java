@@ -23,6 +23,15 @@ public class GroupService {
         return groups;
     };
 
+    public List<Group> findUserGroups(String username){
+        List<Group> groups = groupMapper.findUserGroups(username);
+
+//        for (User ausr: users) {
+//            ausr.processIcon();
+//        }
+        return groups;
+    };
+
     public List<GroupMember> findUserInGroup(String groupname){
         List<GroupMember> userInGroup = groupMapper.findUserInGroup(groupname);
         return userInGroup;
@@ -36,5 +45,22 @@ public class GroupService {
         group.setOwnername(ownername);
         List<Integer> createGroupFlag = groupMapper.createGroup(group);
         return createGroupFlag;
+    }
+
+    public List<Integer> leftGroup(String username,String groupname){
+//        List<Integer> createGroupFlag = groupMapper.createGroup(groupname,type,ownername);
+        GroupMember groupMember = new GroupMember();
+        groupMember.setUsername(username);
+        groupMember.setGroupname(groupname);
+        List<Integer> outFromGroupFlag = groupMapper.leftGroup(groupMember);
+        return outFromGroupFlag;
+    }
+
+    public List<Integer> deleteGroup(String groupname){
+//        List<Integer> createGroupFlag = groupMapper.createGroup(groupname,type,ownername);
+        Group group = new Group();
+        group.setName(groupname);
+        List<Integer> deleteGroupFlag = groupMapper.deleteGroup(group);
+        return deleteGroupFlag;
     }
 }

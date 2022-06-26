@@ -8,6 +8,7 @@ public class Message {
     public static final String MSGTYPE_BYE = "bye";
     public static final String MSGTYPE_LISTUSER = "listUser";
     public static final String MSGTYPE_GETGROUPMEMBER = "getGroupMember";
+    public static final String MSGTYPE_LEFTGROUP = "leftGroup";
 
 
     int id;

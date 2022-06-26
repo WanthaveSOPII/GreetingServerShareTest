@@ -3,6 +3,25 @@ package com.example.greetingserver.pojo;
 public class GroupMember {
     String username;
     String nickname;
+    String groupname;
+    String statusname;
+
+    public String getGroupname() {
+        return groupname;
+    }
+
+    public void setGroupname(String groupname) {
+        this.groupname = groupname;
+    }
+
+    public String getStatusname() {
+        return statusname;
+    }
+
+    public void setStatusname(String statusname) {
+        this.statusname = statusname;
+    }
+
     boolean isAdmin;
 
     public String getUsername() {

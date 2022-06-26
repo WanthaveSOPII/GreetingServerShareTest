@@ -48,4 +48,29 @@ public class GroupController {
         return map;
     }
 
+    @PostMapping(path = "/doOutFromGroup")
+    public Map<String, Object> outFromGroup(@RequestBody Group group, HttpServletRequest servletRequest) throws IOException {
+        Map<String, Object> map = new HashMap<>();
+        String username = servletRequest.getUserPrincipal().getName();
+        List<Integer> leftGroupFlag = groupService.leftGroup(username,group.getName());
+        if(leftGroupFlag.get(0) == 1){
+            map.put("leftGroupFlag", "success");
+        }else {
+            map.put("leftGroupFlag", "error");
+        }
+        return map;
+    }
+
+    @PostMapping(path = "/doDeleteGroup")
+    public Map<String, Object> deleteGroup(@RequestBody Group group, HttpServletRequest servletRequest) throws IOException {
+        Map<String, Object> map = new HashMap<>();
+        List<Integer> deleteGroupFlag = groupService.deleteGroup(group.getName());
+        if(deleteGroupFlag.get(0) == 1){
+            map.put("outFromGroupFlag", "success");
+        }else {
+            map.put("outFromGroupFlag", "error");
+        }
+        return map;
+    }
+
 }

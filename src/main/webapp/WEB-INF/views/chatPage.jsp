@@ -60,8 +60,11 @@
                         <li class="right-click-menu-item">
                             <span>加入</span>
                         </li>
-                        <li class="right-click-menu-item">
+                        <li class="right-click-menu-item" onclick="outFromGroup()">
                             <span>退出</span>
+                        </li>
+                        <li class="right-click-menu-item" onclick="deleteGroup()">
+                            <span>删除</span>
                         </li>
                         <li class="right-click-menu-item-divider"></li>
                         <li class="right-click-menu-item right-click-menu-item-danger">
@@ -144,8 +147,8 @@
                     var host = document.location.host;
                     // var pathname = document.location.pathname;
 
-                    ws = new ReconnectingWebSocket("ws://" +host  + "/wsPage/" + username);
-                    //ws = new WebSocket("ws://" +host  + "/wsPage/" + username);
+                    //ws = new ReconnectingWebSocket("ws://" +host  + "/wsPage/" + username);
+                    ws = new WebSocket("ws://" +host  + "/wsPage/" + username);
                     var time = nowTime();
                     var json = JSON.stringify({
                         "sender":username,
@@ -220,6 +223,9 @@
                              var who = message.info;
                              removeUserFromList(who);
                              systemNotification(message.info+"离开了聊天室")
+                         } else if(message.type == "leftGroup"){
+                             var deleteGroupUI = message.info;
+                             removeGroupFromList(deleteGroupUI);
                          }
 
                         var scroll = document.getElementById('chat');
@@ -250,6 +256,14 @@
                     var closePeople = document.getElementById("userList"+username);
                     if(closePeople!=null){
                         closePeople.parentNode.removeChild(closePeople);
+                    }
+
+                }
+
+                function removeGroupFromList(groupname){
+                    var closeGroup = document.getElementById("grouplist"+groupname);
+                    if(closeGroup!=null){
+                        closeGroup.parentNode.removeChild(closeGroup);
                     }
 
                 }
@@ -372,6 +386,8 @@
                             console.log(jdata);
                             $("#rtn").html("返回结果：" + JSON.stringify(jdata));
                             console.log("add Group action success");
+                            var form=document.getElementsByClassName("addGroupform");
+                            form[0].className="addGroupform";
                         },
                         error: function (xhr, status) {
                             console.log("Status: " + status);
@@ -380,6 +396,70 @@
                         }
                     });
                 }
+
+                function deleteGroup(){
+                    var groupname = groupSelElemId.replace("grouplist","")
+                    console.log("deleteGroup " + groupname);
+                    var url = "/group/doDeleteGroup";
+                    var data = '{"name":"'+groupname+'"}';
+                    $.ajax({
+                        headers:{'Content-Type':'application/json;charset=utf8'},
+                        type: "POST",
+                        url: url,
+                        data: data,
+                        dataType: "json",
+                        success: function (jdata, status) {
+                            console.log("Status: " + status);
+                            console.log(jdata);
+                            $("#rtn").html("返回结果：" + JSON.stringify(jdata));
+                            console.log("delete Group action success");
+                        },
+                        error: function (xhr, status) {
+                            console.log("Status: " + status);
+                            console.log(xhr);
+                            window.alert("请求数据失败");
+                        }
+                    });
+                }
+
+                function outFromGroup(){
+                    var groupname = groupSelElemId.replace("grouplist","")
+                    console.log("outFromGroup " + groupname);
+                    var url = "/group/doOutFromGroup";
+                    var data = '{"name":"'+groupname+'"}';
+                    $.ajax({
+                        headers:{'Content-Type':'application/json;charset=utf8'},
+                        type: "POST",
+                        url: url,
+                        data: data,
+                        dataType: "json",
+                        success: function (jdata, status) {
+                            console.log("Status: " + status);
+                            console.log(jdata);
+                            $("#rtn").html("返回结果：" + JSON.stringify(jdata));
+                            console.log("outFromGroup action success");
+
+                            var time = nowTime();
+                            var json = JSON.stringify({
+                                "sender":"${me}",
+                                "info":groupname,
+                                "recver":"SYSTEM",
+                                "stringTime":time,
+                                "zoneID":Intl.DateTimeFormat().resolvedOptions().timeZone,
+                                "type":"leftGroup"
+                            });
+                            ws.send(json);
+                        },
+                        error: function (xhr, status) {
+                            console.log("Status: " + status);
+                            console.log(xhr);
+                            window.alert("请求数据失败");
+                        }
+                    });
+
+                }
+
+
 
                 window.onload = () => {
 
@@ -429,7 +509,7 @@
                     groupDiv.addEventListener("mouseover", function( e ) {
                         // highlight the mouseenter target
 
-                        if((e.target.parentElement.id=="group")&&(e.target.id!="")){
+                        if((e.target.parentElement.id=="group")&&(e.target.id!="")&&(e.target.id!="grpMenu")){
                             if(groupSelElemId!=e.target.id) {
                                 if(grpselectedMenu!=null) {
                                     grpselectedMenu.classList.remove('active');
@@ -437,6 +517,7 @@
                                 groupSelElemId = e.target.id;
                                 grpselectedMenu = document.getElementById(e.target.id);
                                 closeRightClickMenu();
+                                console.log(e.target.id);
                             }
 
                             // console.log(groupSelElemId);

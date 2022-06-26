@@ -42,14 +42,14 @@ public class ChatController {
 
     @RequestMapping("/chatPage")
     public String chatPage(Model model, HttpServletRequest req) {
-        String me = "zhangsan";
+        String me;
 
         //子颉： LOOK!
         me = req.getUserPrincipal().getName();
 
         List<User> users = userService.findAll();
         model.addAttribute("users", users);
-        List<Group> groups = groupService.findAll();
+        List<Group> groups = groupService.findUserGroups(me);
         model.addAttribute("groups", groups);
         List<Message> messages = messageService.findTopTen();
         model.addAttribute("messages", messages);

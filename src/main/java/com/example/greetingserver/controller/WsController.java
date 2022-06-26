@@ -84,7 +84,7 @@ public class WsController {
     @OnMessage
     public void onMessage(Session session, Message message) throws IOException, EncodeException {
         if(message.getType().equals(Message.MSGTYPE_HELLO)){
-
+            broadcast(message);
         }else if(message.getType().equals(Message.MSGTYPE_CHAT)){
             message.setSender(users.get(session.getId()));
             SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -97,10 +97,12 @@ public class WsController {
             Timestamp t = new Timestamp(datetime.getTime());
             message.setTime(t);
             messageService.insertMessage(message);
-        }else if(message.getType().equals(Message.MSGTYPE_GETGROUPMEMBER)){
-
+            broadcast(message);
+        }else if(message.getType().equals(Message.MSGTYPE_LEFTGROUP)){
+            message.setRecver(message.getSender());
+            message.setSender("SYSTEM");
+            selfcast(message);
         }
-        broadcast(message);
     }
 
     @OnClose
@@ -143,4 +145,25 @@ public class WsController {
                 }
             }
 
+    private void selfcast(Message message) throws IOException, EncodeException {
+        ArrayList<String> userSessions = new ArrayList<String>();
+        String username = users.get(this.session.getId());
+        for(Map.Entry<String, String> session :  users.entrySet()){
+            if(session.getValue().equals(username)){
+                userSessions.add(session.getKey());
+            }
+        }
+        chatEndpoints.forEach(endpoint -> {
+            synchronized (endpoint) {
+                try {
+                    if(userSessions.contains(endpoint.session.getId())) {
+                        endpoint.session.getBasicRemote()
+                                .sendObject(message);
+                    }
+                } catch (IOException | EncodeException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
 }

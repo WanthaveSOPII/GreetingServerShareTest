@@ -12,6 +12,9 @@ public interface GroupMapper {
     @Select("SELECT Id, Name, CreateTime ,GroupOwnerid, Active ,Type, Status FROM `group` WHERE active=1 AND type=1")
     List<Group> findAll();
 
+    @Select("CALL findUserGroups(#{username})")
+    List<Group> findUserGroups(String username);
+
     @Select("CALL findUserInGroup(#{groupname})")
     List<GroupMember> findUserInGroup(String groupname);
 
@@ -20,4 +23,14 @@ public interface GroupMapper {
 
     @Select("CALL createGroup(#{name},#{type},#{ownername})")
     List<Integer> createGroup(Group group);
+
+
+    @Select("CALL outFromGroup(#{username},#{groupname},'LEFT')")
+    List<Integer> leftGroup(GroupMember groupMember);
+
+    @Select("CALL outFromGroup(#{username},#{groupname},'REMOVED')")
+    List<Integer> removedFromGroup(GroupMember groupMember);
+
+    @Select("CALL deleteGroup(#{name})")
+    List<Integer> deleteGroup(Group group);
 }
