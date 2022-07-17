@@ -33,10 +33,10 @@ public class HelloController {
             userInfo = new User();
             userInfo.setUsername(request.getUserPrincipal().getName());
             userInfo.setNickname(userInfo.getUsername());
-            request.getSession().setAttribute("UserInfo", userInfo);
-            m.addAttribute("NickName",userInfo.getNickname());
-            String adminonly = "这条只有管理员才能看得见";
-            m.addAttribute("adminonly",adminonly);
+//            request.getSession().setAttribute("UserInfo", userInfo);
+//            m.addAttribute("NickName",userInfo.getNickname());
+//            String adminonly = "这条只有管理员才能看得见";
+//            m.addAttribute("adminonly",adminonly);
         }
         return "hello";
 

@@ -63,4 +63,26 @@ public class GroupService {
         List<Integer> deleteGroupFlag = groupMapper.deleteGroup(group);
         return deleteGroupFlag;
     }
+
+    public Integer joinGroup(String username,String groupname){
+//        List<Integer> createGroupFlag = groupMapper.createGroup(groupname,type,ownername);
+        GroupMember groupMember = new GroupMember();
+        groupMember.setGroupname(groupname);
+        groupMember.setUsername(username);
+        Integer joinGroupFlag;
+        List<Integer> joinGroupRes = groupMapper.joinGroup(groupMember);
+        if((joinGroupRes!=null )&& (joinGroupRes.size()>0)) {
+            joinGroupFlag = joinGroupRes.get(0);
+        }else {
+            joinGroupFlag = null;
+        }
+        return joinGroupFlag;
+    }
+
+    public String findGroupOwner(String groupname){
+        Group group = new Group();
+        group.setName(groupname);
+        List<User> findGroupOwner = groupMapper.findGroupOwner(group);
+        return findGroupOwner.get(0).getUsername();
+    }
 }

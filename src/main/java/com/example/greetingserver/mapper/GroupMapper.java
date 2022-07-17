@@ -33,4 +33,10 @@ public interface GroupMapper {
 
     @Select("CALL deleteGroup(#{name})")
     List<Integer> deleteGroup(Group group);
+
+    @Select("CALL joinGroup(#{username},#{groupname})")
+    List<Integer> joinGroup(GroupMember groupMember);
+
+    @Select("SELECT username From `group` a INNER JOIN `user` b ON a.groupOwnerid = b.id WHERE a.`name` = #{name}")
+    List<User> findGroupOwner(Group group);
 }

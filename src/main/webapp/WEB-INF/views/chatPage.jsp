@@ -60,6 +60,9 @@
                         <li class="right-click-menu-item">
                             <span>加入</span>
                         </li>
+                        <li class="right-click-menu-item" id="inviteli">
+                            <span>邀请</span>
+                        </li>
                         <li class="right-click-menu-item" onclick="outFromGroup()">
                             <span>退出</span>
                         </li>
@@ -72,11 +75,22 @@
                         </li>
                     </ul>
                 </div>
+
+                <div class="addGroupform" id="addPeopleToGroupform">
+                    <%--                <form action="/group/doAddGroup" method="post"  enctype ="multipart/form-data">--%>
+                    <div class="addGroupInput"><div class="login_logo">邀请用户</div><div class="close" id="inviteClose">X</div></div>
+                    <hr>
+                    <div class="addGroupInput"><input style="width:280px;height:30px;border-radius: 5px;border:1px solid  #e5dfdf;" type="text" name="beInvitedUser" placeholder="&nbsp;用户名"></div>
+                    <div class="addGroupInput"><button class="submit_1" type="submit" onclick="inviteToGroup(document.getElementsByName('beInvitedUser')[0].value)">添&nbsp;加</button></div>
+                    <%--                </form>--%>
+                </div>
+
                             <c:forEach items="${groups}" var="grp" varStatus="st">
                                 <li class="person" id="grouplist${grp.name}" onclick="getGroupMember('${grp.name}')">
                                     <span class="name">${grp.name}</span>
                                 </li>
                             </c:forEach>
+
             </ul>
         </div>
         <div class="right">
@@ -123,6 +137,9 @@
                 var ws;
                 var personSelElemId;
                 var groupSelElemId;
+                var choosedGroup;
+                var groupNow;
+                var memberListNow;
 
                 function setIconInStorage(){
                     <c:forEach items="${users}" var="usr">
@@ -195,7 +212,7 @@
                             messageInfo.innerHTML = message.info;
                             newMessage.append(messageInfo);
 
-                        }else if(message.type == "hello"){
+                        }else if(message.type == "hello"&&groupNow == null){
                              if(hasUserInList(message.sender)==true) {
                                  return;
                              }
@@ -210,15 +227,18 @@
                             // chatdiv.append(newSysInfo);
 
                         }else if(message.type == "listUser"){
-                             var userList = message.info.split("/");
+                             var userList = JSON.parse(message.info);
                              console.log(userList);
-                             for (var i = 0 ;i <userList.length-1;i++){
-                                 if(userList[i]==username) {
-                                     continue;
-                                 }
-                                 addUserToList(userList[i]);
+                             setTimeout( function(){
+                                 for (var i = 0 ;i <userList.length;i++){
+                                     if(userList[i].username==username) {
+                                         continue;
+                                     }
+                                     addUserToList(userList[i].username);
 
-                             }
+                                 }
+                             }, 0.6 * 1000 );
+
                          }else if(message.type == "bye"){
                              var who = message.info;
                              removeUserFromList(who);
@@ -356,12 +376,16 @@
                                 e.removeChild(child);
                                 child = e.lastElementChild;
                             }
-                            var userList = jdata.nameList.split("/");
-                            console.log(userList);
-                            for (var i = 0 ;i <userList.length-1;i++){
-                                addUserToList(userList[i]);
+                            groupNow=groupname;
+                            memberListNow = jdata;
+                            var userList = jdata;
+                            for (var i = 0 ;i <userList.length;i++){
+                                addUserToList(userList[i].username);
 
                             }
+
+                            var groupli = document.getElementById("grouplist"+username);
+                            groupli.classList.add('active');
                         },
                         error: function (xhr, status) {
                             console.log("Status: " + status);
@@ -459,6 +483,32 @@
 
                 }
 
+                function inviteToGroup(username){
+                    var url = "/group/doInviteToGroup";
+                    var data = '{"groupname":"'+choosedGroup+'","username":"'+username+'"}';
+
+
+                    $.ajax({
+                        headers:{'Content-Type':'application/json;charset=utf8'},
+                        type: "POST",
+                        url: url,
+                        data: data,
+                        dataType: "json",
+                        success: function (jdata, status) {
+                            console.log("Status: " + status);
+                            console.log(jdata);
+                            $("#rtn").html("返回结果：" + JSON.stringify(jdata));
+                            console.log("outFromGroup action success");
+                        },
+                        error: function (xhr, status) {
+                            console.log("Status: " + status);
+                            console.log(xhr);
+                            window.alert("请求数据失败");
+                        }
+                    });
+
+                }
+
 
 
                 window.onload = () => {
@@ -483,6 +533,18 @@
                     })
                     close[0].addEventListener('click',function(){
                         form[0].className="addGroupform";
+                    })
+
+                    var inviteOpen=document.getElementById("inviteli");
+                    var inviteClose=document.getElementById("inviteClose");
+                    var inviteForm=document.getElementById("addPeopleToGroupform");
+                    inviteOpen.addEventListener('click',function(){
+                        inviteForm.className="addGroupform open";
+                        choosedGroup = groupSelElemId.replace("grouplist","")
+                        console.log(choosedGroup);
+                    })
+                    inviteClose.addEventListener('click',function(){
+                        inviteForm.className="addGroupform";
                     })
                         //右键开菜单加在这里。以前的用法过时了，传不了e
                     peopleDiv.addEventListener("contextmenu",openUserRightClickMenu);
@@ -574,6 +636,45 @@
                     }
                     window.onclick = closeRightClickMenu;
 
+                    var groupMemberCheck = window.setInterval(function() {
+
+                        if(groupNow!=null){
+                            var url = "/group/getGroupMember";
+                            var data = '{"name":"'+groupNow+'"}';
+                            $.ajax({
+                                headers:{'Content-Type':'application/json;charset=utf8'},
+                                type: "POST",
+                                url: url,
+                                data: data,
+                                dataType: "json",
+                                success: function (jdata, status) {
+                                    console.log("Status: " + status);
+                                    console.log(jdata);
+                                    $("#rtn").html("返回结果：" + JSON.stringify(jdata));
+                                    if(memberListNow!=jdata) {
+                                        var e = document.getElementById("people");
+                                        var child = e.lastElementChild;
+                                        while (child) {
+                                            e.removeChild(child);
+                                            child = e.lastElementChild;
+                                        }
+                                        memberListNow = jdata;
+                                        var userList = jdata;
+                                        console.log(userList);
+                                        for (var i = 0; i < userList.length; i++) {
+                                            addUserToList(userList[i].username);
+                                        }
+                                    }
+                                },
+                                error: function (xhr, status) {
+                                    console.log("Status: " + status);
+                                    console.log(xhr);
+                                    window.alert("请求数据失败");
+                                }
+                            });
+                        }
+
+                    },10000)
 
                 }
             </script>

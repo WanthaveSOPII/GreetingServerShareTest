@@ -50,4 +50,6 @@ public interface UserMapper {
     @Select("SELECT deleteOneUser(#{username})")
     List<Integer> deleteUser(String username);
 
+
+
 }

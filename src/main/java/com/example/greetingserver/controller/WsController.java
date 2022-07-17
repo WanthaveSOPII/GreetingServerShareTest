@@ -5,6 +5,7 @@ import com.example.greetingserver.pojo.User;
 import com.example.greetingserver.service.GroupService;
 import com.example.greetingserver.service.MessageService;
 import com.example.greetingserver.service.UserService;
+import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.stereotype.Component;
@@ -43,6 +44,7 @@ public class WsController {
     private Session session;
     private static final Set<WsController> chatEndpoints = new CopyOnWriteArraySet<>();
     private static HashMap<String, String> users = new HashMap<>();
+    private String inGroup;
 
     @OnOpen
     public void onOpen(Session session, @PathParam("username") String username) throws IOException, EncodeException {
@@ -72,12 +74,22 @@ public class WsController {
     }
 
     private String allUsersList(){
-        String res ="";
+        String username = users.get(this.session.getId());
+
+        List<User> userList = new ArrayList<User>();
+        User member = new User();
+        member.setUsername(username);
+        userList.add(member);
         Iterator<Map.Entry<String, String>> iterator = this.users.entrySet().iterator();
         while (iterator.hasNext()){
             Map.Entry<String, String> next = iterator.next();
-            res+=next.getValue()+"/";
+            if(next.getValue().compareTo(username)!=0) {
+                member = new User();
+                member.setUsername(next.getValue());
+                userList.add(member);
+            }
         }
+        String res = new Gson().toJson(userList);
 
         return res;
     }
