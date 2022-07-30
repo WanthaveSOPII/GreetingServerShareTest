@@ -18,10 +18,10 @@ import java.util.List;
 //@Repository
 public interface MessageMapper {
 
-    @Select("SELECT * FROM message")
+    @Select("SELECT * FROM message m LEFT JOIN message_picture mp ON m.id = mp.messageID")
     List<Message> findAll();
 
-    @Select("SELECT * FROM message Order by time DESC limit 10")
+    @Select("SELECT * FROM message m LEFT JOIN message_picture mp ON m.id = mp.messageID Order by time DESC limit 10")
     List<Message> findTopTen();
 
     @Insert("insert into message(info,sender,time,recver,zoneID) values(#{info},#{sender},#{time},#{recver},#{zoneID})")

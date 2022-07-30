@@ -114,6 +114,18 @@ public class WsController {
             message.setRecver(message.getSender());
             message.setSender("SYSTEM");
             selfcast(message);
+        }else if(message.getType().equals(Message.MSGTYPE_PICTURE)){
+            message.setSender(users.get(session.getId()));
+            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            java.util.Date datetime = null;
+            try {
+                datetime = df.parse(message.getStringTime());
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            Timestamp t = new Timestamp(datetime.getTime());
+            message.setTime(t);
+            broadcast(message);
         }
     }
 
@@ -178,4 +190,6 @@ public class WsController {
             }
         });
     }
+
+
 }

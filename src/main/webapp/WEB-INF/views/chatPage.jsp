@@ -97,18 +97,23 @@
             <div class="chat" id="chat">
                 <div class="conversation-start">
                     <span>Today, 5:38 PM</span>
-                </div>
-
-                <c:forEach items="${messages}" var="msg" varStatus="st">
-                    <div STYLE="height: 70px;" >
-<%--                        <p class ="leftName" name="${msg.sender}">${msg.sender}</p>--%>
-                        <div class="chaticon you" name="${msg.sender}">
-                            <img src="img/dog.png" class="chaticon" name="${msg.sender}">
-                        </div>
-                        <div class="bubble you" name="${msg.sender}">
-                            ${msg.info}
-                        </div>
                     </div>
+
+                    <c:forEach items="${messages}" var="msg" varStatus="st">
+                        <div STYLE="height: 70px;" >
+                                <%--                        <p class ="leftName" name="${msg.sender}">${msg.sender}</p>--%>
+                                <div class="chaticon you" name="${msg.sender}">
+                                    <img src="img/dog.png" class="chaticon" name="${msg.sender}">
+                                </div>
+                                <div class="bubble you" name="${msg.sender}">
+                                        ${msg.info}
+                                </div>
+                        </div>
+                        <div STYLE="height: 100px;" >
+                                <div class="bubble you" name="${msg.sender}">
+                                    <img alt="img" src="data:image/jpeg;base64,${msg.base64pic}" style="height: 64px;width:64px;"/>
+                                </div>
+                        </div>
                 </c:forEach>
 <%--                <div id="newdiv"></div>--%>
             </div>
@@ -127,7 +132,9 @@
             </script>
 
             <div class="write">
-                <a href="javascript:;" class="write-link attach"></a>
+                <form method="post" enctype="multipart/form-data" id="file_upload">
+                        <input type="file" id="file" name="upload_image" style="width: 29px" class="write-link attach" accept="image/gif, image/jpeg, image/png, image/jpg">
+                </form>
                 <input type="text" id="msg"/>
                 <button onclick="send()" style="height: 41px" class="write-link send"></button>
 <%--                <button onclick="send()" class="write-link send"></button>--%>
@@ -140,6 +147,7 @@
                 var choosedGroup;
                 var groupNow;
                 var memberListNow;
+                var fileInput = document.getElementById('file');
 
                 function setIconInStorage(){
                     <c:forEach items="${users}" var="usr">
@@ -209,7 +217,42 @@
                             } else {
                                 messageInfo.setAttribute("class", "bubble you");
                             }
+                             messageInfo.setAttribute("style", "bubble you");
                             messageInfo.innerHTML = message.info;
+                            newMessage.append(messageInfo);
+
+                        }else if(message.type =="picture") {
+
+                            var newMessage = document.createElement('div');
+                            newMessage.setAttribute("id", "newMessage");
+                            newMessage.setAttribute("style", "height: 100px;");
+                            chatdiv.append(newMessage);
+                            var chaticon = document.createElement('div');
+                            var img = document.createElement('img');
+                            img.src = "data:image/jpeg;base64,"+sessionStorage.getItem(message.sender);
+                            img.setAttribute("class", "chaticon");
+                            chaticon.setAttribute("name", message.sender);
+                            if (message.sender == username) {
+                                chaticon.setAttribute("class", "chaticon me");
+                            } else {
+                                chaticon.setAttribute("class", "chaticon you");
+                            }
+                            chaticon.append(img);
+                            newMessage.append(chaticon);
+                            var messageInfo = document.createElement('div');
+                            messageInfo.setAttribute("name", message.sender);
+                            if (message.sender == username) {
+                                messageInfo.setAttribute("class", "bubble me");
+                            } else {
+                                messageInfo.setAttribute("class", "bubble you");
+                            }
+                             //<img alt="img" src="data:image/jpeg;base64,${msg.base64pic}" style="height: 64px;width:64px;"/>
+                             var messagePicture = document.createElement('img');
+                             messagePicture.setAttribute("alt","img");
+                             messagePicture.setAttribute("src",message.info);
+                             messagePicture.setAttribute("style","height: 64px;width:64px;");
+
+                            messageInfo.append(messagePicture);
                             newMessage.append(messageInfo);
 
                         }else if(message.type == "hello"&&groupNow == null){
@@ -351,6 +394,19 @@
                     ws.send(json);
                     document.getElementById('msg').value=''
                 }
+                function sendPicture(data) {
+
+                    var time =nowTime();
+
+                    var json = JSON.stringify({
+                        "info":data,
+                        "recver":"ALLUSER",
+                        "stringTime":time,
+                        "zoneID":Intl.DateTimeFormat().resolvedOptions().timeZone,
+                        "type":"picture"
+                    });
+                    ws.send(json);
+                }
                 function addZero(s) {
                     return s < 10 ? ('0' + s) : s;
                 }
@@ -376,7 +432,13 @@
                                 e.removeChild(child);
                                 child = e.lastElementChild;
                             }
+                            if (groupNow!=null) {
+                                var grpli = document.getElementById("grouplist" + groupNow);
+                                grpli.classList.remove('ingroup')
+                            }
                             groupNow=groupname;
+                            grpli = document.getElementById("grouplist"+groupNow);
+                            grpli.classList.add('ingroup');
                             memberListNow = jdata;
                             var userList = jdata;
                             for (var i = 0 ;i <userList.length;i++){
@@ -384,8 +446,6 @@
 
                             }
 
-                            var groupli = document.getElementById("grouplist"+username);
-                            groupli.classList.add('active');
                         },
                         error: function (xhr, status) {
                             console.log("Status: " + status);
@@ -635,6 +695,34 @@
                         return false;
                     }
                     window.onclick = closeRightClickMenu;
+
+                    fileInput.addEventListener('change', function() {
+                        if (!fileInput.value) {
+                            info.innerHTML = '没有选择文件';
+                            return;
+                        }
+                        var file = fileInput.files[0];
+                        // 获取File信息:
+                        <%--info.innerHTML = `文件名称:  + ${file.name}<br>文件大小: ${file.size} <br>上传时间: ${file.lastModifiedDate}`;--%>
+                        <%--if (!['image/jpeg', 'image/png', 'image/gif'].includes(file.type)) {--%>
+                        <%--    alert('不是有效的图片文件!');--%>
+                        <%--    return;--%>
+                        <%--}--%>
+                        // 读取文件:
+                        let reader = new FileReader();
+                        reader.onload = function(e) {
+                            var data = e.target.result;
+                            console.log("图片数据");
+                            console.log(data);
+                            sendPicture(data);
+                        };
+                        // 以DataURL的形式读取文件:
+                        reader.readAsDataURL(file);
+                        // console.log("以下是file")
+                        // console.log(file);
+
+                    });
+
 
                     var groupMemberCheck = window.setInterval(function() {
 

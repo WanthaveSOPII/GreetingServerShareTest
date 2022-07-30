@@ -171,7 +171,7 @@ body {
   text-overflow: ellipsis;
   color: var(--grey);
 }
-.container .left .usrgrp .person.active, .container .left .usrgrp .person:hover {
+.container .left .usrgrp .person.active, .container .left .usrgrp .person:hover{
   margin-top: -1px;
   margin-left: -1px;
   padding-top: 13px;
@@ -180,11 +180,21 @@ body {
   width: calc(100% + 2px);
   padding-left: calc(10% + 1px);
 }
-.container .left .usrgrp .person.active span, .container .left .usrgrp .person:hover span {
+.container .left .usrgrp .person.ingroup{
+  margin-top: -1px;
+  margin-left: -1px;
+  padding-top: 13px;
+  border: 0;
+  background-color: #007eff;
+  width: calc(100% + 2px);
+  padding-left: calc(10% + 1px);
+}
+
+.container .left .usrgrp .person.active span, .container .left .usrgrp .person:hover span, .container .left .usrgrp .person.ingroup span{
   color: var(--white);
   background: transparent;
 }
-.container .left .usrgrp .person.active:after, .container .left .usrgrp .person:hover:after {
+.container .left .usrgrp .person.active:after, .container .left .usrgrp .person:hover:after, .container .left .usrgrp .person.ingroup:after {
   display: none;
 }
 .container .right {
@@ -283,7 +293,7 @@ body {
 .container .right .write input {
   font-size: 16px;
   float: left;
-  width: 619px;
+  width: 610px;
   height: 40px;
   padding: 0 10px;
   color: var(--dark);

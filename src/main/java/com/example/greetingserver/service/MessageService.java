@@ -6,6 +6,8 @@ import com.example.greetingserver.pojo.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -26,12 +28,17 @@ public class MessageService {
 
     public List<Message> findTopTen(){
         List<Message> messageList;
+        List<Message> messageReverse = new ArrayList<Message>();
         messageList = messageMapper.findTopTen();
-        for (Message msg:messageList) {
+
+        for(int i = 9;i>=0;i--){
+            messageReverse.add(messageList.get(i));
+        }
+        for (Message msg:messageReverse) {
             String msgHead = "Receiver:";
             msg.setRecver(msgHead+msg.getRecver());
         }
-        return messageList;
+        return messageReverse;
     };
 
     public void insertMessage(Message msg){
