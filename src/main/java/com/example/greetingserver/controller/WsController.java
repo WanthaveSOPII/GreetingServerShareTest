@@ -6,6 +6,9 @@ import com.example.greetingserver.service.GroupService;
 import com.example.greetingserver.service.MessageService;
 import com.example.greetingserver.service.UserService;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.stereotype.Component;
@@ -45,6 +48,7 @@ public class WsController {
     private static final Set<WsController> chatEndpoints = new CopyOnWriteArraySet<>();
     private static HashMap<String, String> users = new HashMap<>();
     private String inGroup;
+    private static HashMap<String, FileUploadStatus> largeFile = new HashMap<>();
 
     @OnOpen
     public void onOpen(Session session, @PathParam("username") String username) throws IOException, EncodeException {
@@ -126,6 +130,43 @@ public class WsController {
             Timestamp t = new Timestamp(datetime.getTime());
             message.setTime(t);
             broadcast(message);
+        }else if(message.getType().equals(Message.MSGTYPE_UPLOADLARGEFILE)){
+            JsonObject jsonObject = (JsonObject) new JsonParser().parse(message.getInfo());
+            JsonElement jsonElement;
+            FileUploadStatus fileUploadStatus;
+            String status = null;
+            //检查info的前台状态
+            if((jsonElement = jsonObject.get("status"))!=null) {
+                status = jsonElement.getAsString();
+            }
+            //如果状态为空返回错误
+            switch(status){
+                case "init":
+                    //1.以下为状态为init的情况下的处理
+                    if(largeFile.get(session.getId())!=null){
+                        //通知前台请求被取消
+                        return;
+                    }
+                    //允许新请求，把文件信息存下
+                    fileUploadStatus = new FileUploadStatus();
+
+                    if((jsonElement = jsonObject.get("size"))!=null) {
+                        fileUploadStatus.fileSize = jsonElement.getAsInt();
+                    }
+                    //发回请求被接受的信息
+                    break;
+                case "started":
+                    //2.以下为started的处理
+                    fileUploadStatus = largeFile.get(session.getId());
+                    break;
+                case "uploading":
+                    //3.以下为uploading的处理
+                    break;
+                case "completed":
+                    //4.以下为completed的处理
+                    break;
+            };
+
         }
     }
 
@@ -191,5 +232,13 @@ public class WsController {
         });
     }
 
-
+    class FileUploadStatus{
+        String fileName;
+        String data[];
+        int shardSize;
+        int fileSize;
+        String fileType;
+        int shardCount;
+    }
 }
+

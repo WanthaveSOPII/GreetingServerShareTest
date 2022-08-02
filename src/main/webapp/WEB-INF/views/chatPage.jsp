@@ -148,6 +148,16 @@
                 var groupNow;
                 var memberListNow;
                 var fileInput = document.getElementById('file');
+                var uploadFileStatus = {
+                    "status":"init",//包含 init初始化 started完成发送准备 uploading正在发送文件 completed已完成
+                    "fileName":null,
+                    "fileSize":null,
+                    "fileType":null,
+                    "shardSize":null,
+                    "shardCount":null,
+                    "shardIndex":-1,
+                    "data":null
+                };
 
                 function setIconInStorage(){
                     <c:forEach items="${users}" var="usr">
@@ -289,6 +299,12 @@
                          } else if(message.type == "leftGroup"){
                              var deleteGroupUI = message.info;
                              removeGroupFromList(deleteGroupUI);
+                         } else if(message.type == "uploadLargeFile"){
+                             //如果收到后台的错误信息的处理
+                             //收到后台相应信息的处理
+                             //按照返回的状态开始发送
+                             //按照返回的状态继续发送
+                             //按照返回的状态结束发送
                          }
 
                         var scroll = document.getElementById('chat');
@@ -569,7 +585,72 @@
 
                 }
 
+                function socketUpload(file,data){
+                    let name = file.name,        //文件名
+                        size = file.size,      //总大小
+                        type = file.type;
+                    //socket数据针过大会导致发送断开
+                    let shardSize = 4 * 1024,    //以1MB为一个分片
+                        shardCount = Math.ceil(size / shardSize);  //总片数
+                    uploadFileStatus.data = data;
+                    uploadFileStatus.shardSize = shardSize;
+                    uploadFileStatus.fileSize = size;
+                    uploadFileStatus.fileType = type;
+                    uploadFileStatus.fileName = name;
+                    uploadFileStatus.shardCount = shardCount;
+                    let map = {code:null,type:type,name: null, chunks: null, status: null};
+                    map.chunks = shardCount;
+                    map.name = name;
+                    map.code = 0;
+                    map.status = uploadFileStatus.status;
+                    //传递文件的初步信息
+                    console.log('建立文件上传通道 ...');
+                    var time = nowTime();
+                    var json = JSON.stringify({
+                        "sender":"${me}",
+                        "info":JSON.stringify(map),
+                        "recver":"SYSTEM",
+                        "stringTime":time,
+                        "zoneID":Intl.DateTimeFormat().resolvedOptions().timeZone,
+                        "type":"uploadLargeFile"
+                    });
+                    ws.send(json);
+                    uploadFileStatus.status = "started";
 
+
+
+                        // //创建服务器存储目录
+                        // ws.send(JSON.stringify(map));
+
+                    // ws.onmessage = (evt) => {
+                    //     console.log('Received Message: ' + evt.data);
+                    //     let parse = JSON.parse(evt.data);
+                    //     if (parse.code == 101) {
+                    //         console.log('通道已建立 ...');
+                    //         for (let i = 0; i < shardCount; ++i) {
+                    //             //计算每一片的起始与结束位置
+                    //             let start = i * shardSize,
+                    //                 end = Math.min(size, start + shardSize);
+                    //             let fileBlob = file.slice(start, end);
+                    //             ws.send(fileBlob);
+                    //         }
+                    //     }
+                    //     if (parse.code == 200) {
+                    //         document.getElementById(dom).innerHTML = "当前上传进度为：" + parse.msg + "%";
+                    //     } else if (parse.code == 202){
+                    //         document.getElementById(dom).innerHTML = "文件正在解析";
+                    //     } else if (parse.code == 201){
+                    //         document.getElementById(dom).innerHTML = "解析成功，地址为："+parse.data;
+                    //         if (type ==='video'){
+                    //             changeVideo(parse.data);
+                    //         }
+                    //     }else {
+                    //         document.getElementById(dom).innerHTML = parse.data;
+                    //     }
+                    //     return null;
+                    // }
+
+                }
 
                 window.onload = () => {
 
@@ -714,7 +795,7 @@
                             var data = e.target.result;
                             console.log("图片数据");
                             console.log(data);
-                            sendPicture(data);
+                            socketUpload(file,data);
                         };
                         // 以DataURL的形式读取文件:
                         reader.readAsDataURL(file);

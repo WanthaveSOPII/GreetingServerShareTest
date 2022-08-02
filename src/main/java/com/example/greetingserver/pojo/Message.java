@@ -12,6 +12,8 @@ public class Message {
     public static final String MSGTYPE_GETGROUPMEMBER = "getGroupMember";
     public static final String MSGTYPE_LEFTGROUP = "leftGroup";
     public static final String MSGTYPE_PICTURE = "picture";
+    public static final String MSGTYPE_UPLOADLARGEFILE = "uploadLargeFile";
+
 
 
     int id;
