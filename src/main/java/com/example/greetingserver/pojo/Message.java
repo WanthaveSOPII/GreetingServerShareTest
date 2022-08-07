@@ -13,6 +13,7 @@ public class Message {
     public static final String MSGTYPE_LEFTGROUP = "leftGroup";
     public static final String MSGTYPE_PICTURE = "picture";
     public static final String MSGTYPE_UPLOADLARGEFILE = "uploadLargeFile";
+    public static final String MSGTYPE_GETMESSAGE = "getMessage";
 
 
 

@@ -1,6 +1,8 @@
 package com.example.greetingserver.controller;
 
+import com.example.greetingserver.mapper.MessageMapper;
 import com.example.greetingserver.pojo.Message;
+import com.example.greetingserver.pojo.User;
 import com.example.greetingserver.service.MessageService;
 import com.example.greetingserver.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +16,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @EnableAutoConfiguration
-@RestController
-public class MessageController {
+@Controller
+public class MessageUIController {
 
     @Autowired
     MessageService messageService;
@@ -23,9 +25,11 @@ public class MessageController {
     @Autowired
     UserService userService;
 
-    @RequestMapping("/getMessages")
-    public String getMessages(Model model, HttpServletRequest request) {
-        //获取n个message，输入为messageID的数组
-        return null;
+    @RequestMapping("/listMessage")
+    public String listMessage(Model model, HttpServletRequest request) {
+        List<Message> messages = messageService.findAll();
+        model.addAttribute("messages", messages);
+        model.addAttribute("NickName",request.getUserPrincipal().getName());
+        return "showMessages";
     }
 }

@@ -133,6 +133,7 @@ public class WsController {
         }else if(message.getType().equals(Message.MSGTYPE_UPLOADLARGEFILE)){
             JsonObject jsonObject = (JsonObject) new JsonParser().parse(message.getInfo());
             JsonElement jsonElement;
+            InfoMap map = new InfoMap();
             FileUploadStatus fileUploadStatus;
             String status = null;
             //检查info的前台状态
@@ -142,28 +143,89 @@ public class WsController {
             //如果状态为空返回错误
             switch(status){
                 case "init":
-                    //1.以下为状态为init的情况下的处理
+                //1.以下为状态为init的情况下的处理
                     if(largeFile.get(session.getId())!=null){
-                        //通知前台请求被取消
                         return;
                     }
-                    //允许新请求，把文件信息存下
+                //允许新请求，把文件信息存下
                     fileUploadStatus = new FileUploadStatus();
 
-                    if((jsonElement = jsonObject.get("size"))!=null) {
+                    if((jsonElement = jsonObject.get("fileSize"))!=null) {
                         fileUploadStatus.fileSize = jsonElement.getAsInt();
                     }
-                    //发回请求被接受的信息
+                    if((jsonElement = jsonObject.get("shardSize"))!=null) {
+                        fileUploadStatus.shardSize = jsonElement.getAsInt();
+
+                    }
+                    if((jsonElement = jsonObject.get("fileType"))!=null) {
+                        fileUploadStatus.fileType = jsonElement.getAsString();
+                    }
+                    if((jsonElement = jsonObject.get("fileName"))!=null) {
+                        fileUploadStatus.fileName = jsonElement.getAsString();
+                    }
+                    if((jsonElement = jsonObject.get("shardCount"))!=null) {
+                        fileUploadStatus.shardCount = jsonElement.getAsInt();
+                        for(int i = 0;i < fileUploadStatus.shardCount;i++){
+                            fileUploadStatus.data.add("");
+                        }
+                    }
+                    if((jsonElement = jsonObject.get("id"))!=null) {
+                        fileUploadStatus.id = jsonElement.getAsString();
+                    }
+
+                    fileUploadStatus.status = status;
+
+
+                    largeFile.put(session.getId(),fileUploadStatus);
+                    map = new InfoMap();
+                    map.id = fileUploadStatus.id;
+                    map.status = "initCompleted";
+                    message.setInfo(new Gson().toJson(map));
+                    unicast(message);
+                //发回请求被接受的信息
                     break;
                 case "started":
-                    //2.以下为started的处理
+                //2.以下为started的处理
                     fileUploadStatus = largeFile.get(session.getId());
+                    fileUploadStatus.status = status;
                     break;
                 case "uploading":
-                    //3.以下为uploading的处理
+                //3.以下为uploading的处理
+                    fileUploadStatus = largeFile.get(session.getId());
+                    String slicedData = "";
+                    int shardIndex = -1;
+                    if((jsonElement = jsonObject.get("slicedFile"))!=null) {
+                        slicedData = jsonElement.getAsString();
+                    }
+                    if((jsonElement = jsonObject.get("shardIndex"))!=null) {
+                        shardIndex = jsonElement.getAsInt();
+                    }
+                    if(shardIndex!=-1) {
+                        fileUploadStatus.data.set(shardIndex, slicedData);
+                    }
+                    largeFile.replace(session.getId(),fileUploadStatus);
+                    map = new InfoMap();
+                    map.id = fileUploadStatus.id;
+                    map.shardIndex = shardIndex;
+                    map.status = "shardCompleted";
+                    message.setInfo(new Gson().toJson(map));
+                    unicast(message);
                     break;
+
                 case "completed":
-                    //4.以下为completed的处理
+                    fileUploadStatus = largeFile.get(session.getId());
+                    for(int i=0;i<fileUploadStatus.shardCount;i++){
+                        fileUploadStatus.file += fileUploadStatus.data.get(i);
+                    }
+                    map = new InfoMap();
+                    map.id = fileUploadStatus.id;
+                    map.status = "fileUploadCompleted";
+                    message.setInfo(new Gson().toJson(map));
+                    unicast(message);
+                    //把图片信息当做是一个新的message存入数据库
+                    //获取这个message的id
+                    //告诉所有用户去取这条信息
+                //4.以下为completed的处理
                     break;
             };
 
@@ -211,7 +273,7 @@ public class WsController {
             }
 
     private void selfcast(Message message) throws IOException, EncodeException {
-        ArrayList<String> userSessions = new ArrayList<String>();
+        ArrayList<String> userSessions = new ArrayList<>();
         String username = users.get(this.session.getId());
         for(Map.Entry<String, String> session :  users.entrySet()){
             if(session.getValue().equals(username)){
@@ -233,12 +295,20 @@ public class WsController {
     }
 
     class FileUploadStatus{
+        String id;
         String fileName;
-        String data[];
+        ArrayList<String> data = new ArrayList<String>();
+        String file;
         int shardSize;
         int fileSize;
         String fileType;
         int shardCount;
+        String status;
+    }
+    class InfoMap{
+        String id;
+        int shardIndex = -1;
+        String status;
     }
 }
 
