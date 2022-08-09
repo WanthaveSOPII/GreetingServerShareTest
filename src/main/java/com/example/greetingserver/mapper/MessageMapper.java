@@ -24,8 +24,15 @@ public interface MessageMapper {
     @Select("SELECT * FROM message m LEFT JOIN message_picture mp ON m.id = mp.messageID Order by time DESC limit 10")
     List<Message> findTopTen();
 
+    @Select("SELECT * FROM message m LEFT JOIN message_picture mp ON m.id = mp.messageID WHERE m.id = #{msgID};")
+    List<Message> findByID(Integer msgID);
+
+
     @Insert("insert into message(info,sender,time,recver,zoneID) values(#{info},#{sender},#{time},#{recver},#{zoneID})")
     void insertMessage(Message msg);
+
+    @Select("CALL insertPicMsg(#{picture},#{sender},#{time},#{recver},#{zoneID})")
+    List<Integer> insertPicMsg(Message msg);
 //    public boolean insertMessage(Message msg) throws ParseException {
 //
 //        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

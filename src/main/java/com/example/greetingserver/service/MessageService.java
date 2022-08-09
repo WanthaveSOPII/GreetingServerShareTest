@@ -41,7 +41,21 @@ public class MessageService {
         return messageReverse;
     };
 
+    public List<Message> findById(int msgID){
+        List<Message> messageList = messageMapper.findByID(msgID);
+        for (Message msg:messageList) {
+            String msgHead = "Receiver:";
+            msg.setRecver(msgHead+msg.getRecver());
+        }
+        return messageList;
+    };
+
     public void insertMessage(Message msg){
         messageMapper.insertMessage(msg);
+    }
+
+    public int insertPicMsg(Message msg){
+        List<Integer> msgID = messageMapper.insertPicMsg(msg);
+        return msgID.get(0);
     }
 }

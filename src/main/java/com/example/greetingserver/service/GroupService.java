@@ -85,4 +85,5 @@ public class GroupService {
         List<User> findGroupOwner = groupMapper.findGroupOwner(group);
         return findGroupOwner.get(0).getUsername();
     }
+
 }

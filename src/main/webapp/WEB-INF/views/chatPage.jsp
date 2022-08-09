@@ -329,7 +329,8 @@
                                      });
                                      ws.send(json);
                                  }
-                             }else if((status == "fileUploadCompleted")&&(uploadFileStatus.status == "uploading")){
+                             }else if((status == "fileUploadCompleted")&&(uploadFileStatus.status == "completed")){
+                                getPicMsgByID(message);
                                 //1.本message应该含有message的id
                                 //2.调用http方法用id从数据库读传好的图片
                                 //3.显示图片
@@ -622,6 +623,64 @@
 
                 }
 
+                function getPicMsgByID(message){
+                    console.log("getPicMsgByID");
+                    var url = "/message/getPicMsg";
+                    // var data = '{"name":"'+groupname+'","id":"11"}';
+                    var data = '{"id":"'+message.id+'"}';
+                    $.ajax({
+                        headers:{'Content-Type':'application/json;charset=utf8'},
+                        type: "POST",
+                        url: url,
+                        data: data,
+                        //headers:{'Content-Type':'application/json;charset=utf8'},
+                        dataType: "json",
+                        success: function (jdata, status) {
+                            console.log("Status: " + status);
+                            console.log(jdata);
+                           // $("#rtn").html("返回结果：" + JSON.stringify(jdata));
+                            message = jdata;
+                            var username = "${me}";
+                            var chatdiv = document.getElementById("chat");
+                            var newMessage = document.createElement('div');
+                            newMessage.setAttribute("id", "newMessage");
+                            newMessage.setAttribute("style", "height: 100px;");
+                            chatdiv.append(newMessage);
+                            var chaticon = document.createElement('div');
+                            var img = document.createElement('img');
+                            img.src = "data:image/jpeg;base64,"+sessionStorage.getItem(message.sender);
+                            img.setAttribute("class", "chaticon");
+                            chaticon.setAttribute("name", message.sender);
+                            if (message.sender == username) {
+                                chaticon.setAttribute("class", "chaticon me");
+                            } else {
+                                chaticon.setAttribute("class", "chaticon you");
+                            }
+                            chaticon.append(img);
+                            newMessage.append(chaticon);
+                            var messageInfo = document.createElement('div');
+                            messageInfo.setAttribute("name", message.sender);
+                            if (message.sender == username) {
+                                messageInfo.setAttribute("class", "bubble me");
+                            } else {
+                                messageInfo.setAttribute("class", "bubble you");
+                            }
+                            //<img alt="img" src="data:image/jpeg;base64,${msg.base64pic}" style="height: 64px;width:64px;"/>
+                            var messagePicture = document.createElement('img');
+                            messagePicture.setAttribute("alt","img");
+                            console.log("message.base64pic : "+message.base64pic)
+                            messagePicture.setAttribute("src","data:image/jpeg;base64,"+message.base64pic);
+                            messagePicture.setAttribute("style","height: 64px;width:64px;");
+
+                        },
+                        error: function (xhr, status) {
+                            console.log("Status: " + status);
+                            console.log(xhr);
+                            window.alert("请求数据失败");
+                        }
+                    });
+                }
+
                 function socketUpload(file,data){
                     let name = file.name,        //文件名
                         size = data.length,      //总大小
@@ -667,9 +726,10 @@
                 function largeFileSlice(){
                     for (let i = 0; i < uploadFileStatus.shardCount; ++i) {
                         //计算每一片的起始与结束位置
-                        let start = i * uploadFileStatus.fileSize,
+                        let start = i * uploadFileStatus.shardSize,
                             end = Math.min(uploadFileStatus.fileSize, start + uploadFileStatus.shardSize);
                         let fileBlob = uploadFileStatus.data.slice(start, end);
+                        console.log("第"+i+"片碎片为"+fileBlob)
                         let map = {id: uploadFileStatus.id, slicedFile: fileBlob, status: "uploading",shardIndex:i};
                             var json = JSON.stringify({
                                 "sender":"${me}",

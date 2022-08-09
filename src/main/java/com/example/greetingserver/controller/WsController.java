@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
+import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -191,11 +192,17 @@ public class WsController {
                     break;
                 case "uploading":
                 //3.以下为uploading的处理
+                    String base64 ="base64,";
+                    int base64Index = -1;
                     fileUploadStatus = largeFile.get(session.getId());
                     String slicedData = "";
                     int shardIndex = -1;
                     if((jsonElement = jsonObject.get("slicedFile"))!=null) {
                         slicedData = jsonElement.getAsString();
+                        base64Index = slicedData.indexOf(base64);
+                        if (base64Index >= 0){
+                            slicedData = slicedData.substring(base64Index + base64.length());
+                        }
                     }
                     if((jsonElement = jsonObject.get("shardIndex"))!=null) {
                         shardIndex = jsonElement.getAsInt();
@@ -217,11 +224,29 @@ public class WsController {
                     for(int i=0;i<fileUploadStatus.shardCount;i++){
                         fileUploadStatus.file += fileUploadStatus.data.get(i);
                     }
+                    Message sqlMsg = new Message();
+                    sqlMsg.setSender(users.get(session.getId()));
+
+                    SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    java.util.Date datetime = null;
+                    try {
+                        datetime = df.parse(message.getStringTime());
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                    Timestamp t = new Timestamp(datetime.getTime());
+                    sqlMsg.setTime(t);
+
+                    sqlMsg.setRecver("ALLUSER");
+                    sqlMsg.setZoneID(message.getZoneID());
+                    sqlMsg.setPicture(DatatypeConverter.parseBase64Binary(fileUploadStatus.file));
+                    int msgID = messageService.insertPicMsg(sqlMsg);
+                    message.setId(msgID);
                     map = new InfoMap();
                     map.id = fileUploadStatus.id;
                     map.status = "fileUploadCompleted";
                     message.setInfo(new Gson().toJson(map));
-                    unicast(message);
+                    broadcast(message);
                     //把图片信息当做是一个新的message存入数据库
                     //获取这个message的id
                     //告诉所有用户去取这条信息
@@ -298,7 +323,7 @@ public class WsController {
         String id;
         String fileName;
         ArrayList<String> data = new ArrayList<String>();
-        String file;
+        String file = "";
         int shardSize;
         int fileSize;
         String fileType;
