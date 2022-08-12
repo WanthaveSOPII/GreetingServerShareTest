@@ -182,6 +182,8 @@ public class WsController {
                     map.id = fileUploadStatus.id;
                     map.status = "initCompleted";
                     message.setInfo(new Gson().toJson(map));
+                    message.setRecver(message.getSender());
+                    message.setSender("SYSTEM");
                     unicast(message);
                 //发回请求被接受的信息
                     break;
@@ -216,6 +218,8 @@ public class WsController {
                     map.shardIndex = shardIndex;
                     map.status = "shardCompleted";
                     message.setInfo(new Gson().toJson(map));
+                    message.setRecver(message.getSender());
+                    message.setSender("SYSTEM");
                     unicast(message);
                     break;
 
@@ -246,7 +250,10 @@ public class WsController {
                     map.id = fileUploadStatus.id;
                     map.status = "fileUploadCompleted";
                     message.setInfo(new Gson().toJson(map));
+                    message.setSender("SYSTEM");
+                    message.setRecver("ALLUSER");
                     broadcast(message);
+                    largeFile.remove(session.getId());
                     //把图片信息当做是一个新的message存入数据库
                     //获取这个message的id
                     //告诉所有用户去取这条信息

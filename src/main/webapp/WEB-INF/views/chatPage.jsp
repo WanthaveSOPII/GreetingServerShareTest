@@ -309,6 +309,7 @@
                              //如果收到后台的错误信息的处理
 
                              //收到后台相应信息的处理
+                             //status是后台的状态，uploadFileStatus是前台状态
                             if((status == "initCompleted")&&(uploadFileStatus.status == "started")){
                                 console.log(status);
                                 uploadFileStatus.status = "uploading";
@@ -329,26 +330,32 @@
                                      });
                                      ws.send(json);
                                  }
-                             }else if((status == "fileUploadCompleted")&&(uploadFileStatus.status == "completed")){
+                             }else if(status == "fileUploadCompleted"){
+
                                 getPicMsgByID(message);
-                                //1.本message应该含有message的id
-                                //2.调用http方法用id从数据库读传好的图片
-                                //3.显示图片
+
+                                if((uploadFileStatus.status == "completed")&&(id == uploadFileStatus.id)) {
+                                    uploadFileStatus = {
+                                        "status": "init",//包含 init初始化 started完成发送准备 uploading正在发送文件 completed已完成
+                                        "fileName": null,
+                                        "fileSize": null,
+                                        "fileType": null,
+                                        "shardSize": null,
+                                        "shardCount": null,
+                                        "shardIndex": -1,
+                                        "data": null,
+                                        "id": null,
+                                        "completedPakage": 0
+                                    };
+                                }
+
                             }
-                             //按照返回的状态开始发送
-
-                             //按照返回的状态继续发送
-
-                             //按照返回的状态结束发送
                          }else if(message.type == "getMessage"){
-                             //server提醒用户去取信息
-                             //调用http方法用id从数据库读传好的图片
                          }
 
                         var scroll = document.getElementById('chat');
                         scroll.scrollTop = scroll.scrollHeight;
 
-                        // log.innerHTML += message.from + " : " + message.content + "\n";
                     }
                 }
 
@@ -623,11 +630,11 @@
 
                 }
 
-                function getPicMsgByID(message){
+                function getPicMsgByID(idMessage){
                     console.log("getPicMsgByID");
                     var url = "/message/getPicMsg";
                     // var data = '{"name":"'+groupname+'","id":"11"}';
-                    var data = '{"id":"'+message.id+'"}';
+                    var data = '{"id":"'+idMessage.id+'"}';
                     $.ajax({
                         headers:{'Content-Type':'application/json;charset=utf8'},
                         type: "POST",
@@ -639,7 +646,7 @@
                             console.log("Status: " + status);
                             console.log(jdata);
                            // $("#rtn").html("返回结果：" + JSON.stringify(jdata));
-                            message = jdata;
+                            var message = jdata;
                             var username = "${me}";
                             var chatdiv = document.getElementById("chat");
                             var newMessage = document.createElement('div');
@@ -668,10 +675,11 @@
                             //<img alt="img" src="data:image/jpeg;base64,${msg.base64pic}" style="height: 64px;width:64px;"/>
                             var messagePicture = document.createElement('img');
                             messagePicture.setAttribute("alt","img");
-                            console.log("message.base64pic : "+message.base64pic)
                             messagePicture.setAttribute("src","data:image/jpeg;base64,"+message.base64pic);
                             messagePicture.setAttribute("style","height: 64px;width:64px;");
 
+                            messageInfo.append(messagePicture);
+                            newMessage.append(messageInfo);
                         },
                         error: function (xhr, status) {
                             console.log("Status: " + status);
@@ -884,6 +892,7 @@
                             return;
                         }
                         var file = fileInput.files[0];
+
                         // 获取File信息:
                         <%--info.innerHTML = `文件名称:  + ${file.name}<br>文件大小: ${file.size} <br>上传时间: ${file.lastModifiedDate}`;--%>
                         <%--if (!['image/jpeg', 'image/png', 'image/gif'].includes(file.type)) {--%>
@@ -901,6 +910,7 @@
                         };
                         // 以DataURL的形式读取文件:
                         reader.readAsDataURL(file);
+                        fileInput.value = '';
                         // console.log("以下是file")
                         // console.log(file);
 
