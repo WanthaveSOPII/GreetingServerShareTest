@@ -53,6 +53,7 @@ public class WsController {
 
     @OnOpen
     public void onOpen(Session session, @PathParam("username") String username) throws IOException, EncodeException {
+        System.out.println("onOpen");
         this.session = session;
         chatEndpoints.add(this);
         users.put(session.getId(), username);
@@ -261,6 +262,7 @@ public class WsController {
 
     @OnClose
     public void onClose(Session session) throws IOException, EncodeException {
+        System.out.println("onclose");
         chatEndpoints.remove(this);
         String username = users.get(this.session.getId());
         users.remove(this.session.getId());
@@ -274,6 +276,7 @@ public class WsController {
 
     @OnError
     public void onError(Session session, Throwable throwable) {
+        System.out.println("onError");
         // Do error handling here
     }
 

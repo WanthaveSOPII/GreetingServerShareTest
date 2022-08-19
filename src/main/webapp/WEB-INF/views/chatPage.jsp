@@ -203,6 +203,15 @@
                     findTopTenInGroup(groupNow);
 
 
+                    ws.onopen = function (event){
+                        console.log("websocket open")
+                    }
+                    ws.onclose = function (event){
+                        console.log("websocket close")
+                    }
+                    ws.onerror = function (event){
+                        console.log("websocket error")
+                    }
                     ws.onmessage = function(event) {
                         console.log("收到 "+event.data);
                         var message = JSON.parse(event.data);
@@ -755,11 +764,11 @@
                         messageInfo.setAttribute("class", "bubble you");
                     }
                     //<img alt="img" src="data:image/jpeg;base64,${msg.base64pic}" style="height: 64px;width:64px;"/>
-                    if(message.info!=null) {
+                    if((message.info!=null)&& (message.base64pic==null)) {
                         newMessage.setAttribute("style", "height: 70px;");
                         messageInfo.innerHTML = message.info;
                     }
-                    else if(message.info == null && message.base64pic!=null) {
+                    else if((message.info == null) && (message.base64pic!=null)) {
                         newMessage.setAttribute("style", "height: 100px;");
                         var messagePicture = document.createElement('img');
                         messagePicture.setAttribute("alt", "img");
@@ -767,6 +776,20 @@
                         messagePicture.setAttribute("style", "height: 64px;width:64px;");
 
                         messageInfo.append(messagePicture);
+                    }else if((message.info != null) && (message.base64pic!=null)){
+                        var infoDiv = document.createElement("div");
+                        var picDiv = document.createElement("div");
+                        infoDiv.innerHTML = message.info;
+                        var messagePicture = document.createElement('img');
+                        messagePicture.setAttribute("alt", "img");
+                        messagePicture.setAttribute("src", "data:image/jpeg;base64," + message.base64pic);
+                        messagePicture.setAttribute("style", "height: 128px;");
+                        picDiv.append(messagePicture);
+                        infoDiv.setAttribute("style", "height: 24px;");
+                        picDiv.setAttribute("style", "height: 128px;")
+                        newMessage.setAttribute("style", "height: 188px;");
+                        messageInfo.append(infoDiv);
+                        messageInfo.append(picDiv);
                     }
                     newMessage.append(messageInfo);
                 }
