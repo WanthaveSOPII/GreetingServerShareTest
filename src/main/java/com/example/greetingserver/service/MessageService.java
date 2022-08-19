@@ -26,17 +26,36 @@ public class MessageService {
         return messageList;
     };
 
-    public List<Message> findTopTen(){
+    //找出在组里的十条信息
+    public List<Message> findTopTenInGroup(String groupName){
         List<Message> messageList;
         List<Message> messageReverse = new ArrayList<Message>();
-        messageList = messageMapper.findTopTen();
+        messageList = messageMapper.findTopTenInGroup(groupName);
 
-        for(int i = 9;i>=0;i--){
+        for(int i = messageList.size()-1;i>=0;i--){
             messageReverse.add(messageList.get(i));
         }
         for (Message msg:messageReverse) {
             String msgHead = "Receiver:";
             msg.setRecver(msgHead+msg.getRecver());
+            msg.processPicture();
+        }
+        return messageReverse;
+    };
+
+    //找出在大厅的十条信息
+    public List<Message> findTopTen(){
+        List<Message> messageList;
+        List<Message> messageReverse = new ArrayList<Message>();
+        messageList = messageMapper.findTopTen();
+
+        for(int i = messageList.size()-1;i>=0;i--){
+            messageReverse.add(messageList.get(i));
+        }
+        for (Message msg:messageReverse) {
+            String msgHead = "Receiver:";
+            msg.setRecver(msgHead+msg.getRecver());
+            msg.processPicture();
         }
         return messageReverse;
     };

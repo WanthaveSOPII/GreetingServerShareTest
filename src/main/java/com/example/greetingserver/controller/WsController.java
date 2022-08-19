@@ -64,7 +64,7 @@ public class WsController {
         Message message = new Message();
         message.setType(Message.MSGTYPE_LISTUSER);
         message.setSender("SYSTEM");
-        message.setRecver(username);
+        message.setRecver("SYSTEM");
         message.setInfo(allUsersList());
         this.unicast(message);
     }
@@ -116,7 +116,7 @@ public class WsController {
             messageService.insertMessage(message);
             broadcast(message);
         }else if(message.getType().equals(Message.MSGTYPE_LEFTGROUP)){
-            message.setRecver(message.getSender());
+            message.setRecver("SYSTEM");
             message.setSender("SYSTEM");
             selfcast(message);
         }else if(message.getType().equals(Message.MSGTYPE_PICTURE)){
@@ -182,8 +182,6 @@ public class WsController {
                     map.id = fileUploadStatus.id;
                     map.status = "initCompleted";
                     message.setInfo(new Gson().toJson(map));
-                    message.setRecver(message.getSender());
-                    message.setSender("SYSTEM");
                     unicast(message);
                 //发回请求被接受的信息
                     break;
@@ -218,8 +216,6 @@ public class WsController {
                     map.shardIndex = shardIndex;
                     map.status = "shardCompleted";
                     message.setInfo(new Gson().toJson(map));
-                    message.setRecver(message.getSender());
-                    message.setSender("SYSTEM");
                     unicast(message);
                     break;
 
@@ -241,7 +237,7 @@ public class WsController {
                     Timestamp t = new Timestamp(datetime.getTime());
                     sqlMsg.setTime(t);
 
-                    sqlMsg.setRecver("ALLUSER");
+                    sqlMsg.setRecver(message.getRecver());
                     sqlMsg.setZoneID(message.getZoneID());
                     sqlMsg.setPicture(DatatypeConverter.parseBase64Binary(fileUploadStatus.file));
                     int msgID = messageService.insertPicMsg(sqlMsg);
@@ -251,7 +247,6 @@ public class WsController {
                     map.status = "fileUploadCompleted";
                     message.setInfo(new Gson().toJson(map));
                     message.setSender("SYSTEM");
-                    message.setRecver("ALLUSER");
                     broadcast(message);
                     largeFile.remove(session.getId());
                     //把图片信息当做是一个新的message存入数据库

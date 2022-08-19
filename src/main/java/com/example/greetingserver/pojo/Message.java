@@ -27,7 +27,9 @@ public class Message {
 
 
     String sender;
+    //如果message是在group里面则recver就是group的name
     String recver;
+
     String zoneID;
 
     //目前包含

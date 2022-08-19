@@ -24,11 +24,12 @@ public class GroupController {
     GroupService groupService;
 
     @RequestMapping("/getGroupMember")
-    public String getGroupMember(@RequestBody Group group) {
+    public List<GroupMember> getGroupMember(@RequestBody Group group) {
         Map<String, Object> map = new HashMap<>();
         List<GroupMember> userInGroup = groupService.findUserInGroup(group.getName());
-        String str = new Gson().toJson(userInGroup);
-        return str;
+        //String str = new Gson().toJson(userInGroup);
+        //return str;
+        return userInGroup;
     }
 
 //    @RequestMapping("/getGroupMember")

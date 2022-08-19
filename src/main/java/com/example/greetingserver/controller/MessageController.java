@@ -32,10 +32,16 @@ public class MessageController {
     @RequestMapping("/message/getPicMsg")
     public Message getMessages(@RequestBody Message msg) {
         msg = messageService.findById(msg.getId()).get(0);
-        msg.processPicture();
+
         return msg;
     }
 
+    @RequestMapping("/message/findTopTenInGroup")
+    public List<Message> findTopTenInGroup(@RequestBody Group group) {
+        List<Message> topTenMsg = messageService.findTopTenInGroup(group.getName());
+
+        return topTenMsg;
+    }
 //    public String getGroupMember(@RequestBody Group group) {
 //        Map<String, Object> map = new HashMap<>();
 //        List<GroupMember> userInGroup = groupService.findUserInGroup(group.getName());

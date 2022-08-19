@@ -99,22 +99,22 @@
                     <span>Today, 5:38 PM</span>
                     </div>
 
-                    <c:forEach items="${messages}" var="msg" varStatus="st">
-                        <div STYLE="height: 70px;" >
-                                <%--                        <p class ="leftName" name="${msg.sender}">${msg.sender}</p>--%>
-                                <div class="chaticon you" name="${msg.sender}">
-                                    <img src="img/dog.png" class="chaticon" name="${msg.sender}">
-                                </div>
-                                <div class="bubble you" name="${msg.sender}">
-                                        ${msg.info}
-                                </div>
-                        </div>
-                        <div STYLE="height: 100px;" >
-                                <div class="bubble you" name="${msg.sender}">
-                                    <img alt="img" src="data:image/jpeg;base64,${msg.base64pic}" style="height: 64px;width:64px;"/>
-                                </div>
-                        </div>
-                </c:forEach>
+<%--                    <c:forEach items="${messages}" var="msg" varStatus="st">--%>
+<%--                        <div STYLE="height: 70px;" >--%>
+<%--                                &lt;%&ndash;                        <p class ="leftName" name="${msg.sender}">${msg.sender}</p>&ndash;%&gt;--%>
+<%--                                <div class="chaticon you" name="${msg.sender}">--%>
+<%--                                    <img src="img/dog.png" class="chaticon" name="${msg.sender}">--%>
+<%--                                </div>--%>
+<%--                                <div class="bubble you" name="${msg.sender}">--%>
+<%--                                        ${msg.info}--%>
+<%--                                </div>--%>
+<%--                        </div>--%>
+<%--                        <div STYLE="height: 100px;" >--%>
+<%--                                <div class="bubble you" name="${msg.sender}">--%>
+<%--                                    <img alt="img" src="data:image/jpeg;base64,${msg.base64pic}" style="height: 64px;width:64px;"/>--%>
+<%--                                </div>--%>
+<%--                        </div>--%>
+<%--                </c:forEach>--%>
 <%--                <div id="newdiv"></div>--%>
             </div>
 
@@ -128,6 +128,7 @@
                         objs[i].className = "bubble me";
                     if (objs[i].className == "chaticon you")
                         objs[i].className = "chaticon me";
+
                 }
             </script>
 
@@ -144,8 +145,8 @@
                 var ws;
                 var personSelElemId;
                 var groupSelElemId;
-                var choosedGroup;
-                var groupNow;
+                var chosenGroup;
+                var groupNow = "ALLUSERS";
                 var memberListNow;
                 var fileInput = document.getElementById('file');
 
@@ -191,7 +192,7 @@
                     var json = JSON.stringify({
                         "sender":username,
                         "info":username+"进入了聊天室",
-                        "recver":"ALLUSER",
+                        "recver":groupNow,
                         "stringTime":time,
                         "zoneID":Intl.DateTimeFormat().resolvedOptions().timeZone,
                         "type":"hello"
@@ -199,14 +200,14 @@
                     setTimeout( function(){
                         ws.send(json);
                     }, 0.5 * 1000 );
+                    findTopTenInGroup(groupNow);
 
 
                     ws.onmessage = function(event) {
                         console.log("收到 "+event.data);
                         var message = JSON.parse(event.data);
                         var chatdiv = document.getElementById("chat");
-                         if(message.type =="chat") {
-
+                         if(message.type =="chat"&&groupNow == message.recver) {
                             var newMessage = document.createElement('div');
                             newMessage.setAttribute("id", "newMessage");
                             newMessage.setAttribute("style", "height: 70px;");
@@ -234,7 +235,7 @@
                             messageInfo.innerHTML = message.info;
                             newMessage.append(messageInfo);
 
-                        }else if(message.type =="picture") {
+                        }else if(message.type =="picture"&&groupNow == message.recver) {
 
                             var newMessage = document.createElement('div');
                             newMessage.setAttribute("id", "newMessage");
@@ -268,7 +269,7 @@
                             messageInfo.append(messagePicture);
                             newMessage.append(messageInfo);
 
-                        }else if(message.type == "hello"&&groupNow == null){
+                        }else if(message.type == "hello"&&groupNow == message.recver){
                              if(hasUserInList(message.sender)==true) {
                                  return;
                              }
@@ -295,14 +296,14 @@
                                  }
                              }, 0.6 * 1000 );
 
-                         }else if(message.type == "bye"){
+                         }else if(message.type == "bye"&&groupNow == message.recver){
                              var who = message.info;
                              removeUserFromList(who);
                              systemNotification(message.info+"离开了聊天室")
                          } else if(message.type == "leftGroup"){
                              var deleteGroupUI = message.info;
                              removeGroupFromList(deleteGroupUI);
-                         } else if(message.type == "uploadLargeFile"){
+                         } else if(message.type == "uploadLargeFile"&&groupNow == message.recver){
                              var infoMap = JSON.parse(message.info);
                              var id = infoMap.id;
                              var status = infoMap.status;
@@ -318,12 +319,13 @@
                                 console.log(status);
                                  uploadFileStatus.completedPakage++;
                                  if(uploadFileStatus.completedPakage==uploadFileStatus.shardCount){
+                                     console.log("发出completed")
                                      uploadFileStatus.status = "completed";
                                      let map = {id: uploadFileStatus.id, status: "completed"};
                                      var json = JSON.stringify({
                                          "sender":"${me}",
                                          "info":JSON.stringify(map),
-                                         "recver":"SYSTEM",
+                                         "recver":groupNow,
                                          "stringTime":nowTime(),
                                          "zoneID":Intl.DateTimeFormat().resolvedOptions().timeZone,
                                          "type":"uploadLargeFile"
@@ -350,7 +352,7 @@
                                 }
 
                             }
-                         }else if(message.type == "getMessage"){
+                         }else if(message.type == "getMessage"&&groupNow == message.recver){
                          }
 
                         var scroll = document.getElementById('chat');
@@ -446,7 +448,7 @@
                     var content = document.getElementById("msg").value;
                     var json = JSON.stringify({
                         "info":content,
-                        "recver":"ALLUSER",
+                        "recver":groupNow,
                         "stringTime":time,
                         "zoneID":Intl.DateTimeFormat().resolvedOptions().timeZone,
                         "type":"chat"
@@ -461,7 +463,7 @@
 
                     var json = JSON.stringify({
                         "info":data,
-                        "recver":"ALLUSER",
+                        "recver":groupNow,
                         "stringTime":time,
                         "zoneID":Intl.DateTimeFormat().resolvedOptions().timeZone,
                         "type":"picture"
@@ -493,7 +495,13 @@
                                 e.removeChild(child);
                                 child = e.lastElementChild;
                             }
-                            if (groupNow!=null) {
+                            var chatDiv = document.getElementById("chat");
+                            child = chatDiv.lastElementChild;
+                            while (child) {
+                                chatDiv.removeChild(child);
+                                child = chatDiv.lastElementChild;
+                            }
+                            if (groupNow!="ALLUSERS") {
                                 var grpli = document.getElementById("grouplist" + groupNow);
                                 grpli.classList.remove('ingroup')
                             }
@@ -506,6 +514,7 @@
                                 addUserToList(userList[i].username);
 
                             }
+                            findTopTenInGroup(groupNow);
 
                         },
                         error: function (xhr, status) {
@@ -606,7 +615,7 @@
 
                 function inviteToGroup(username){
                     var url = "/group/doInviteToGroup";
-                    var data = '{"groupname":"'+choosedGroup+'","username":"'+username+'"}';
+                    var data = '{"groupname":"'+chosenGroup+'","username":"'+username+'"}';
 
 
                     $.ajax({
@@ -689,6 +698,82 @@
                     });
                 }
 
+                function findTopTenInGroup(groupname){
+                    console.log("getPicMsgByID");
+                    var url = "/message/findTopTenInGroup";
+                    // var data = '{"name":"'+groupname+'","id":"11"}';
+                    var data = '{"name":"'+groupname+'"}';
+                    $.ajax({
+                        headers:{'Content-Type':'application/json;charset=utf8'},
+                        type: "POST",
+                        url: url,
+                        data: data,
+                        //headers:{'Content-Type':'application/json;charset=utf8'},
+                        dataType: "json",
+                        success: function (jdata, status) {
+                            console.log("Status: " + status);
+                            console.log(jdata);
+                            var messageList = jdata;
+                            // $("#rtn").html("返回结果：" + JSON.stringify(jdata));
+                            for (var i = 0 ;i <messageList.length;i++){
+                                message = messageList[i];
+                                insertMsgToChat(message);
+                            }
+                        },
+                        error: function (xhr, status) {
+                            console.log("Status: " + status);
+                            console.log(xhr);
+                            window.alert("请求数据失败");
+                        }
+                    });
+                }
+
+                function insertMsgToChat(message){
+                    var username = "${me}";
+                    var chatdiv = document.getElementById("chat");
+                    var newMessage = document.createElement('div');
+                    newMessage.setAttribute("id", "newMessage");
+
+                    chatdiv.append(newMessage);
+                    var chaticon = document.createElement('div');
+                    var img = document.createElement('img');
+                    img.src = "data:image/jpeg;base64,"+sessionStorage.getItem(message.sender);
+                    img.setAttribute("class", "chaticon");
+                    chaticon.setAttribute("name", message.sender);
+                    if (message.sender == username) {
+                        chaticon.setAttribute("class", "chaticon me");
+                    } else {
+                        chaticon.setAttribute("class", "chaticon you");
+                    }
+                    chaticon.append(img);
+                    newMessage.append(chaticon);
+                    var messageInfo = document.createElement('div');
+                    messageInfo.setAttribute("name", message.sender);
+                    if (message.sender == username) {
+                        messageInfo.setAttribute("class", "bubble me");
+                    } else {
+                        messageInfo.setAttribute("class", "bubble you");
+                    }
+                    //<img alt="img" src="data:image/jpeg;base64,${msg.base64pic}" style="height: 64px;width:64px;"/>
+                    if(message.info!=null) {
+                        newMessage.setAttribute("style", "height: 70px;");
+                        messageInfo.innerHTML = message.info;
+                    }
+                    else if(message.info == null && message.base64pic!=null) {
+                        newMessage.setAttribute("style", "height: 100px;");
+                        var messagePicture = document.createElement('img');
+                        messagePicture.setAttribute("alt", "img");
+                        messagePicture.setAttribute("src", "data:image/jpeg;base64," + message.base64pic);
+                        messagePicture.setAttribute("style", "height: 64px;width:64px;");
+
+                        messageInfo.append(messagePicture);
+                    }
+                    newMessage.append(messageInfo);
+                }
+
+
+
+
                 function socketUpload(file,data){
                     let name = file.name,        //文件名
                         size = data.length,      //总大小
@@ -718,7 +803,7 @@
                     var json = JSON.stringify({
                         "sender":"${me}",
                         "info":JSON.stringify(map),
-                        "recver":"SYSTEM",
+                        "recver":groupNow,
                         "stringTime":time,
                         "zoneID":Intl.DateTimeFormat().resolvedOptions().timeZone,
                         "type":"uploadLargeFile"
@@ -742,7 +827,7 @@
                             var json = JSON.stringify({
                                 "sender":"${me}",
                                 "info":JSON.stringify(map),
-                                "recver":"SYSTEM",
+                                "recver":groupNow,
                                 "stringTime":nowTime(),
                                 "zoneID":Intl.DateTimeFormat().resolvedOptions().timeZone,
                                 "type":"uploadLargeFile"
@@ -790,8 +875,8 @@
                     var inviteForm=document.getElementById("addPeopleToGroupform");
                     inviteOpen.addEventListener('click',function(){
                         inviteForm.className="addGroupform open";
-                        choosedGroup = groupSelElemId.replace("grouplist","")
-                        console.log(choosedGroup);
+                        chosenGroup = groupSelElemId.replace("grouplist","")
+                        console.log(chosenGroup);
                     })
                     inviteClose.addEventListener('click',function(){
                         inviteForm.className="addGroupform";
@@ -918,8 +1003,8 @@
 
 
                     var groupMemberCheck = window.setInterval(function() {
-
-                        if(groupNow!=null){
+                        console.log("groupMemberCheck");
+                        if(groupNow!="ALLUSERS"){
                             var url = "/group/getGroupMember";
                             var data = '{"name":"'+groupNow+'"}';
                             $.ajax({
@@ -955,7 +1040,7 @@
                             });
                         }
 
-                    },10000)
+                    },1000000)
 
                 }
             </script>
