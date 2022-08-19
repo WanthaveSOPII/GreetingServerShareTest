@@ -764,29 +764,32 @@
                         messageInfo.setAttribute("class", "bubble you");
                     }
                     //<img alt="img" src="data:image/jpeg;base64,${msg.base64pic}" style="height: 64px;width:64px;"/>
-                    if((message.info!=null)&& (message.base64pic==null)) {
-                        newMessage.setAttribute("style", "height: 70px;");
-                        messageInfo.innerHTML = message.info;
-                    }
-                    else if((message.info == null) && (message.base64pic!=null)) {
-                        newMessage.setAttribute("style", "height: 100px;");
-                        var messagePicture = document.createElement('img');
-                        messagePicture.setAttribute("alt", "img");
-                        messagePicture.setAttribute("src", "data:image/jpeg;base64," + message.base64pic);
-                        messagePicture.setAttribute("style", "height: 64px;width:64px;");
 
-                        messageInfo.append(messagePicture);
-                    }else if((message.info != null) && (message.base64pic!=null)){
-                        var infoDiv = document.createElement("div");
-                        var picDiv = document.createElement("div");
+                    var infoDiv;
+                    var picDiv;
+
+                    if(message.info!=null) {
+                        infoDiv = document.createElement("div");
                         infoDiv.innerHTML = message.info;
+                        infoDiv.setAttribute("style", "height: 17px;");
+                    }
+                    if(message.base64pic!=null) {
+                        picDiv = document.createElement("div");
                         var messagePicture = document.createElement('img');
                         messagePicture.setAttribute("alt", "img");
                         messagePicture.setAttribute("src", "data:image/jpeg;base64," + message.base64pic);
                         messagePicture.setAttribute("style", "height: 128px;");
                         picDiv.append(messagePicture);
-                        infoDiv.setAttribute("style", "height: 24px;");
                         picDiv.setAttribute("style", "height: 128px;")
+                    }
+
+                    if(picDiv == null){
+                        newMessage.setAttribute("style", "height: 70px;");
+                        messageInfo.append(infoDiv);
+                    }else if(infoDiv == null){
+                        newMessage.setAttribute("style", "height: 168px;")
+                        messageInfo.append(picDiv);
+                    }else {
                         newMessage.setAttribute("style", "height: 188px;");
                         messageInfo.append(infoDiv);
                         messageInfo.append(picDiv);
